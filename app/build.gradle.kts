@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     id("com.google.dagger.hilt.android")
 }
-
+val API_KEY = "ff526150dd3b248f3eb91cbce80672a8"
 android {
     namespace = "com.ucne.cinetix"
     compileSdk = 34
@@ -24,7 +24,11 @@ android {
     }
 
     buildTypes {
+        debug{
+            buildConfigField("String", "API_KEY", API_KEY)
+        }
         release {
+            buildConfigField("String", "API_KEY", API_KEY)
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -87,10 +91,6 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    //location
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
