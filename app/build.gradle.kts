@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,7 +7,9 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     id("com.google.dagger.hilt.android")
 }
-val API_KEY = "ff526150dd3b248f3eb91cbce80672a8"
+val properties = Properties()
+properties.load(project.rootProject.file("local.properties").inputStream())
+
 android {
     namespace = "com.ucne.cinetix"
     compileSdk = 34
@@ -25,10 +29,10 @@ android {
 
     buildTypes {
         debug{
-            buildConfigField("String", "API_KEY", API_KEY)
+            buildConfigField("String", "API_KEY", properties.getProperty("API_KEY") )
         }
         release {
-            buildConfigField("String", "API_KEY", API_KEY)
+            buildConfigField("String", "API_KEY", properties.getProperty("API_KEY"))
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -45,6 +49,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
@@ -91,6 +96,27 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    //lottie
+    implementation("com.airbnb.android:lottie-compose:5.0.3")
+
+    //SerializableName
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    //Pagination
+    implementation("androidx.paging:paging-compose:1.0.0-alpha15")
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("com.github.skydoves:landscapist-coil:1.4.9")
+
+    //LazyItem
+    implementation("androidx.compose.foundation:foundation:1.1.1")
+    implementation("androidx.compose.foundation:foundation-layout:1.5.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
