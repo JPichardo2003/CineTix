@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ucne.cinetix.presentation.home.HomeScreen
+import com.ucne.cinetix.presentation.profile.ProfileScreen
 
 @Composable
 fun CineTixNavHost(
@@ -22,7 +23,11 @@ fun CineTixNavHost(
             )
         }
         composable<Screen.Profile> {
-            /*TODO*/
+            ProfileScreen(
+                goToHomeScreen = {
+                    navHostController.navigate(Screen.Home)
+                }
+            )
         }
     }
 }

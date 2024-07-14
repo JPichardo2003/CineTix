@@ -45,7 +45,7 @@ fun TopAppBarCineTix(
 ) {
     Row(
         modifier = Modifier
-            .padding(top = 34.dp, bottom = 12.dp, start = 8.dp, end = 8.dp)
+            .padding(top = 12.dp, bottom = 12.dp, start = 8.dp, end = 8.dp)
             .fillMaxWidth()
             .padding(start = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -69,7 +69,7 @@ fun TopAppBarCineTix(
         FilmTypeSelection(homeViewModel)
 
         IconButton(
-            onClick = { /*Aqui se navegara a una barra de busqueda*/ }
+            onClick = {}
         ) {
             Icon(
                 modifier = Modifier.size(28.dp),

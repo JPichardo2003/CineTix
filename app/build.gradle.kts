@@ -118,6 +118,12 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.1.1")
     implementation("androidx.compose.foundation:foundation-layout:1.5.1")
 
+    //constraintLayout
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    // Accompanist
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.5-alpha")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
