@@ -15,7 +15,14 @@ fun CineTixNavHost(
         startDestination = Screen.Home
     ) {
         composable<Screen.Home> {
-            HomeScreen()
+            HomeScreen(
+                goToProfileScreen = {
+                    navHostController.navigate(Screen.Profile)
+                }
+            )
+        }
+        composable<Screen.Profile> {
+            /*TODO*/
         }
     }
 }

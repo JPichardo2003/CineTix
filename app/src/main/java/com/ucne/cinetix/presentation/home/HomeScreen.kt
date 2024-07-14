@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -63,6 +64,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.LoopReverseLottieLoader
+import com.ucne.cinetix.presentation.topbar.TopAppBarCineTix
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
@@ -77,6 +79,7 @@ import java.io.IOException
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
+    goToProfileScreen: () -> Unit
 ) {
     val gradientColors = rememberGradientColors()
 
@@ -87,22 +90,28 @@ fun HomeScreen(
                 brush = Brush.verticalGradient(gradientColors),
             )
     ) {
-        HomeBody(homeViewModel)
+        TopAppBarCineTix(
+            goToProfileScreen = goToProfileScreen
+        )
+        HomeBody(homeViewModel = homeViewModel)
     }
 }
+
 
 @Composable
 fun HomeBody(
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
-    val trendingFilms = homeViewModel.trendingMoviesState.value.collectAsLazyPagingItems()
-    val popularFilms = homeViewModel.popularFilmsState.value.collectAsLazyPagingItems()
-    val topRatedFilms = homeViewModel.topRatedFilmState.value.collectAsLazyPagingItems()
-    val nowPlayingFilms = homeViewModel.nowPlayingMoviesState.value.collectAsLazyPagingItems()
-    val upcomingMovies = homeViewModel.upcomingMoviesState.value.collectAsLazyPagingItems()
-    val backInTheDays = homeViewModel.backInTheDaysMoviesState.value.collectAsLazyPagingItems()
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val trendingFilms = uiState.trendingMoviesState.collectAsLazyPagingItems()
+    val popularFilms = uiState.popularFilmsState.collectAsLazyPagingItems()
+    val topRatedFilms = uiState.topRatedFilmState.collectAsLazyPagingItems()
+    val nowPlayingFilms = uiState.nowPlayingMoviesState.collectAsLazyPagingItems()
+    val upcomingMovies = uiState.upcomingMoviesState.collectAsLazyPagingItems()
+    val backInTheDays = uiState.backInTheDaysMoviesState.collectAsLazyPagingItems()
 
     val listState: LazyListState = rememberLazyListState()
+
     LazyColumn(
         state = listState,
         modifier = Modifier
@@ -153,7 +162,7 @@ fun HomeBody(
             )
         }
 
-        if (homeViewModel.selectedFilmType == FilmType.MOVIE) {
+        if (uiState.selectedFilmType == FilmType.MOVIE) {
             item {
                 Header("Upcoming")
                 ScrollableMovieItems(
@@ -190,7 +199,8 @@ fun HomeBody(
 
 @Composable
 fun GenreList(homeViewModel: HomeViewModel) {
-    val genres = homeViewModel.filmGenres
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val genres = uiState.filmGenres
     LazyRow(
         modifier = Modifier
             .padding(4.dp)
@@ -199,10 +209,10 @@ fun GenreList(homeViewModel: HomeViewModel) {
         items(genres.size) {
             SelectableGenre(
                 genre = genres[it].name,
-                selected = genres[it].name == homeViewModel.selectedGenre.name,
+                selected = genres[it].name == uiState.selectedGenre.name,
                 onclick = {
-                    if (homeViewModel.selectedGenre.name != genres[it].name) {
-                        homeViewModel.selectedGenre = genres[it]
+                    if (uiState.selectedGenre.name != genres[it].name) {
+                        homeViewModel.onGenreChanged(genres[it])
                         homeViewModel.filterBySetSelectedGenre(genres[it])
                     }
                 }
