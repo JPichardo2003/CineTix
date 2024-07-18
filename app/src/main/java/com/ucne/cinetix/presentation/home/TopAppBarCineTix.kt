@@ -1,4 +1,4 @@
-package com.ucne.cinetix.presentation.topbar
+package com.ucne.cinetix.presentation.home
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -34,14 +34,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ucne.cinetix.R
-import com.ucne.cinetix.presentation.home.HomeViewModel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.util.FilmType
 
 @Composable
 fun TopAppBarCineTix(
     homeViewModel: HomeViewModel = hiltViewModel(),
-    goToProfileScreen: () -> Unit
+    goToProfileScreen: () -> Unit,
+    goToSearchScreen: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -68,22 +68,27 @@ fun TopAppBarCineTix(
 
         FilmTypeSelection(homeViewModel)
 
-        IconButton(
-            onClick = {}
+        Box(
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                modifier = Modifier.size(28.dp),
-                painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = "search icon",
-                tint = AppOnPrimaryColor
-            )
+            IconButton(
+                onClick = goToSearchScreen
+            ) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    painter = painterResource(id = R.drawable.ic_search),
+                    contentDescription = "search icon",
+                    tint = AppOnPrimaryColor
+                )
+            }
         }
+
     }
 }
 
 @Composable
 private fun FilmTypeSelection(
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     Column(

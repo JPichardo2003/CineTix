@@ -124,6 +124,9 @@ dependencies {
     // Accompanist
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.24.5-alpha")
 
+    // RatingBar
+    implementation("com.github.a914-gowtham:compose-ratingbar:1.2.3")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

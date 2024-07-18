@@ -64,7 +64,6 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.LoopReverseLottieLoader
-import com.ucne.cinetix.presentation.topbar.TopAppBarCineTix
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
@@ -79,7 +78,8 @@ import java.io.IOException
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
-    goToProfileScreen: () -> Unit
+    goToProfileScreen: () -> Unit,
+    goToSearchScreen: () -> Unit
 ) {
     val gradientColors = rememberGradientColors()
 
@@ -91,7 +91,8 @@ fun HomeScreen(
             )
     ) {
         TopAppBarCineTix(
-            goToProfileScreen = goToProfileScreen
+            goToProfileScreen = goToProfileScreen,
+            goToSearchScreen = goToSearchScreen
         )
         HomeBody(homeViewModel = homeViewModel)
     }
@@ -198,7 +199,7 @@ fun HomeBody(
 }
 
 @Composable
-fun GenreList(homeViewModel: HomeViewModel) {
+fun GenreList(homeViewModel: HomeViewModel= hiltViewModel()) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val genres = uiState.filmGenres
     LazyRow(
@@ -257,7 +258,7 @@ fun MovieItem(
             shimmerParams = ShimmerParams(
                 baseColor = AppPrimaryColor,
                 highlightColor = ButtonColor,
-                durationMillis = 500,
+                durationMillis = 300,
                 dropOff = 0.65F,
                 tilt = 20F
             ),

@@ -2,6 +2,7 @@ package com.ucne.cinetix.data.remote
 
 import com.ucne.cinetix.data.remote.response.FilmResponse
 import com.ucne.cinetix.data.remote.response.GenreResponse
+import com.ucne.cinetix.data.remote.response.MultiSearchResponse
 import com.ucne.cinetix.util.Constants
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -119,4 +120,12 @@ interface TheMovieDbApi {
         @Query("language") language: String = Constants.LANGUAGE_COUNTRY_CODE,
         @Query("sort_by") sortBy: String = "vote_count.desc"
     ): FilmResponse
+
+    @GET("search/multi")
+    suspend fun multiSearch(
+        @Query("query") searchParams: String,
+        @Query("page") page: Int = 0,
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("language") language: String = Constants.LANGUAGE
+    ): MultiSearchResponse
 }

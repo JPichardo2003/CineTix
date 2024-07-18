@@ -240,7 +240,7 @@ fun ProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "version: 1.0.5",
+                    text = "version: 1.1",
                     fontWeight = FontWeight.Light,
                     fontSize = 14.sp,
                     color = AppOnPrimaryColor.copy(alpha = 0.5F)

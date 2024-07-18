@@ -18,6 +18,7 @@ val AppOnPrimaryColor = Color.White.copy(alpha = 0.78F)
 val ButtonColor = Color(0XFF423460)
 val SeeMore = Color(0xFF7E7E7E)
 val ErrorMessage = Color(0xFFE28B8B)
+val RatingStarColor = Color(0XFFC9F964)
 
 //HBOMAX InspirationColors
 val Black = Color(0xFF000000)

@@ -20,7 +20,7 @@ fun BackButton(
         modifier = modifier.size(42.dp),
         containerColor = ButtonColor,
         contentColor = AppOnPrimaryColor,
-        onClick = { goToHomeScreen() }
+        onClick = goToHomeScreen
     ) {
         Icon(
             imageVector = Icons.Rounded.ArrowBack,

@@ -1,6 +1,5 @@
 package com.ucne.cinetix.data.remote.dto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
 data class FilmDto(
