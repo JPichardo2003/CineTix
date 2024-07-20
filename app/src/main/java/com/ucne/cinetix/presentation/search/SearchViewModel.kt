@@ -55,7 +55,6 @@ class SearchViewModel @Inject constructor(
 
 data class SearchUIState(
     var searchParam: String = "",
-    var previousSearch: String = "",
     val multiSearch: Flow<PagingData<SearchDto>> = emptyFlow(),
     var isLoading: Boolean = false
 )

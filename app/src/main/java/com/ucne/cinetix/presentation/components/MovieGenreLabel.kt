@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.ucne.cinetix.ui.theme.RatingStarColor
 
 @Composable
-fun MovieGenre(
+fun MovieGenreLabel(
     genre: String,
     background: Color = RatingStarColor.copy(alpha = 0.16F),
     textColor: Color = RatingStarColor

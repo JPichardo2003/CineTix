@@ -40,7 +40,7 @@ import com.gowtham.ratingbar.RatingBarStyle
 import com.gowtham.ratingbar.StepSize
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.remote.dto.GenreDto
-import com.ucne.cinetix.presentation.components.MovieGenre
+import com.ucne.cinetix.presentation.components.MovieGenreLabel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
@@ -100,21 +100,12 @@ fun SearchResultItem(
                     .padding(all = 8.dp)
                     .fillMaxSize()
             ) {
-                var paddingValue by remember { mutableIntStateOf(2) }
+                val paddingValue by remember { mutableIntStateOf(2) }
                 Text(
                     text = when (mediaType) {
-                        "tv" -> {
-                            paddingValue = 2
-                            "Series"
-                        }
-                        "movie" -> {
-                            paddingValue = 2
-                            "Movie"
-                        }
-                        else -> {
-                            paddingValue = 0
-                            ""
-                        }
+                        "tv" -> { "Series" }
+                        "movie" -> { "Movie" }
+                        else -> {""}
                     },
                     modifier = Modifier
                         .clip(shape = RoundedCornerShape(size = 4.dp))
@@ -170,7 +161,7 @@ fun SearchResultItem(
                 ) {
                     genres?.forEach {
                         item {
-                            MovieGenre(genre = it.name)
+                            MovieGenreLabel(genre = it.name)
                         }
                     }
                 }

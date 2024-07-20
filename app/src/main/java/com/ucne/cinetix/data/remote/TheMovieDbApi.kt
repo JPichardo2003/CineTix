@@ -1,5 +1,6 @@
 package com.ucne.cinetix.data.remote
 
+import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.data.remote.response.FilmResponse
 import com.ucne.cinetix.data.remote.response.GenreResponse
 import com.ucne.cinetix.data.remote.response.MultiSearchResponse
@@ -128,4 +129,35 @@ interface TheMovieDbApi {
         @Query("api_key") apiKey: String = Constants.API_KEY,
         @Query("language") language: String = Constants.LANGUAGE
     ): MultiSearchResponse
+
+    @GET("tv/{tv_id}/similar")
+    suspend fun getSimilarTvShows(
+        @Path("tv_id") filmId: Int,
+        @Query("page") page: Int = 0,
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("language") language: String = Constants.LANGUAGE_COUNTRY_CODE
+    ): FilmResponse
+
+    @GET("movie/{movie_id}/similar")
+    suspend fun getSimilarMovies(
+        @Path("movie_id") filmId: Int,
+        @Query("page") page: Int = 0,
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("language") language: String = Constants.LANGUAGE
+    ): FilmResponse
+
+    @GET("movie/{movie_id}")
+    suspend fun getMovieDetails(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("language") language: String = Constants.LANGUAGE
+    ): FilmDto
+
+    @GET("tv/{series_id}")
+    suspend fun getTvShowDetails(
+        @Path("series_id") seriesId: Int,
+        @Query("api_key") apiKey: String = Constants.API_KEY,
+        @Query("language") language: String = Constants.LANGUAGE_COUNTRY_CODE
+    ): FilmDto
+
 }

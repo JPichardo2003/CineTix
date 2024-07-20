@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.ucne.cinetix.presentation.home.HomeScreen
+import com.ucne.cinetix.presentation.moviedetails.FilmDetailsScreen
 import com.ucne.cinetix.presentation.profile.ProfileScreen
 import com.ucne.cinetix.presentation.search.SearchScreen
 
@@ -14,7 +16,7 @@ fun CineTixNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Home
+        startDestination = Screen.Home,
     ) {
         composable<Screen.Home> {
             HomeScreen(
@@ -23,6 +25,9 @@ fun CineTixNavHost(
                 },
                 goToSearchScreen = {
                     navHostController.navigate(Screen.Search)
+                },
+                goToFilmDetails = { id, filmType ->
+                    navHostController.navigate(Screen.MovieDetails(id, filmType))
                 }
             )
         }
@@ -38,6 +43,14 @@ fun CineTixNavHost(
                 goToHomeScreen = {
                     navHostController.navigate(Screen.Home)
                 }
+            )
+        }
+        composable<Screen.MovieDetails> {
+            val args = it.toRoute<Screen.MovieDetails>()
+            FilmDetailsScreen(
+                filmId = args.filmId,
+                selectedFilm = args.selectedFilmType,
+                goToHomeScreen = { navHostController.navigate(Screen.Home) }
             )
         }
     }

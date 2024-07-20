@@ -79,7 +79,8 @@ import java.io.IOException
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
     goToProfileScreen: () -> Unit,
-    goToSearchScreen: () -> Unit
+    goToSearchScreen: () -> Unit,
+    goToFilmDetails: (Int, Int) -> Unit
 ) {
     val gradientColors = rememberGradientColors()
 
@@ -94,7 +95,10 @@ fun HomeScreen(
             goToProfileScreen = goToProfileScreen,
             goToSearchScreen = goToSearchScreen
         )
-        HomeBody(homeViewModel = homeViewModel)
+        HomeBody(
+            homeViewModel = homeViewModel,
+            goToFilmDetails = goToFilmDetails
+        )
     }
 }
 
@@ -102,6 +106,7 @@ fun HomeScreen(
 @Composable
 fun HomeBody(
     homeViewModel: HomeViewModel = hiltViewModel(),
+    goToFilmDetails: (Int, Int) -> Unit
 ) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val trendingFilms = uiState.trendingMoviesState.collectAsLazyPagingItems()
@@ -129,7 +134,9 @@ fun HomeBody(
             ScrollableMovieItems(
                 landscape = true,
                 pagingItems = trendingFilms,
-                onErrorClick = { homeViewModel.refreshAll() }
+                onErrorClick = { homeViewModel.refreshAll() },
+                goToFilmDetails = goToFilmDetails,
+                selectedFilmType = uiState.selectedFilmType
             )
         }
 
@@ -139,7 +146,10 @@ fun HomeBody(
                 pagingItems = popularFilms,
                 onErrorClick = {
                     homeViewModel.refreshAll()
-                }
+                },
+                goToFilmDetails = goToFilmDetails,
+                selectedFilmType = uiState.selectedFilmType
+
             )
         }
 
@@ -149,7 +159,9 @@ fun HomeBody(
                 pagingItems = topRatedFilms,
                 onErrorClick = {
                     homeViewModel.refreshAll()
-                }
+                },
+                goToFilmDetails = goToFilmDetails,
+                selectedFilmType = uiState.selectedFilmType
             )
         }
 
@@ -159,7 +171,9 @@ fun HomeBody(
                 pagingItems = nowPlayingFilms,
                 onErrorClick = {
                     homeViewModel.refreshAll()
-                }
+                },
+                goToFilmDetails = goToFilmDetails,
+                selectedFilmType = uiState.selectedFilmType
             )
         }
 
@@ -170,7 +184,9 @@ fun HomeBody(
                     pagingItems = upcomingMovies,
                     onErrorClick = {
                         homeViewModel.refreshAll()
-                    }
+                    },
+                    goToFilmDetails = goToFilmDetails,
+                    selectedFilmType = uiState.selectedFilmType
                 )
             }
         }
@@ -187,7 +203,9 @@ fun HomeBody(
                     pagingItems = backInTheDays,
                     onErrorClick = {
                         homeViewModel.refreshAll()
-                    }
+                    },
+                    goToFilmDetails = goToFilmDetails,
+                    selectedFilmType = uiState.selectedFilmType
                 )
             }
         }
@@ -239,7 +257,7 @@ fun MovieItem(
     title: String,
     modifier: Modifier,
     landscape: Boolean,
-    onclick: () -> Unit //para navegar
+    goToFilmDetails: () -> Unit //para navegar
 ) {
     Column(
         modifier = Modifier
@@ -249,7 +267,7 @@ fun MovieItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {
-                onclick()
+                goToFilmDetails()
             },
         horizontalAlignment = Alignment.Start
     ) {
@@ -306,7 +324,9 @@ fun MovieItem(
 private fun ScrollableMovieItems(
     landscape: Boolean = false,
     pagingItems: LazyPagingItems<FilmDto>,
-    onErrorClick: () -> Unit
+    onErrorClick: () -> Unit,
+    goToFilmDetails: (Int, Int) -> Unit,
+    selectedFilmType: FilmType
 ) {
     Box(
         contentAlignment = Center,
@@ -334,6 +354,11 @@ private fun ScrollableMovieItems(
                                     .width(if (landscape) 215.dp else 130.dp)
                                     .height(if (landscape) 161.25.dp else 195.dp)
                             ) {
+                                if (selectedFilmType == FilmType.MOVIE) {
+                                    goToFilmDetails(film.id, 1)
+                                } else {
+                                    goToFilmDetails(film.id, 2)
+                                }
 
                             }
                         }

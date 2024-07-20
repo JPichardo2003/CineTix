@@ -6,6 +6,8 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.kotlinx.serialization)
     id("com.google.dagger.hilt.android")
+    //Parcelize
+    id("kotlin-parcelize")
 }
 val properties = Properties()
 properties.load(project.rootProject.file("local.properties").inputStream())
@@ -126,6 +128,9 @@ dependencies {
 
     // RatingBar
     implementation("com.github.a914-gowtham:compose-ratingbar:1.2.3")
+
+    //material icons
+    implementation("androidx.compose.material:material-icons-extended:1.1.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
