@@ -1,5 +1,6 @@
 package com.ucne.cinetix.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
                     }
                 }
                 is Resource.Error -> {
-                    Timber.e("Error loading Genres")
+                    Log.e("Error", "Error loading Genres")
                 }
                 else -> {}
             }
@@ -199,7 +199,7 @@ class HomeViewModel @Inject constructor(
                 val movieDetails = filmRepository.getMovieDetails(movieId)
                 _uiState.update { it.copy(movieDetails = movieDetails) }
             } catch (e: Exception) {
-                Timber.e(e, "Error fetching movie details")
+                Log.e("Error", "Error fetching movie details")
             }
         }
     }
@@ -210,7 +210,7 @@ class HomeViewModel @Inject constructor(
                 val tvShowDetails = filmRepository.getTvShowDetails(tvShowId)
                 _uiState.update { it.copy(tvShowDetails = tvShowDetails) }
             } catch (e: Exception) {
-                Timber.e(e, "Error fetching tv show details")
+                Log.e("Error", "Error fetching tv show details")
             }
         }
     }

@@ -1,23 +1,25 @@
 package com.ucne.cinetix.di
 
+import android.content.Context
+import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.ucne.cinetix.data.local.database.CineTixDb
 import com.ucne.cinetix.data.remote.TheMovieDbApi
 import com.ucne.cinetix.util.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 @InstallIn(SingletonComponent::class)
 @Module
 object AppModule {
+
     @Provides
     @Singleton
     fun providesMoshi(): Moshi =
@@ -27,30 +29,28 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providesLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-    }
-
-    @Singleton
-    @Provides
-    fun providesOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(httpLoggingInterceptor)
-            .callTimeout(15, TimeUnit.SECONDS)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .build()
-    }
-
-    @Singleton
-    @Provides
-    fun providesTheMovieDbApi(okHttpClient: OkHttpClient): TheMovieDbApi {
+    fun providesTheMovieDbApi(moshi: Moshi): TheMovieDbApi {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TheMovieDbApi::class.java)
     }
+
+    //Room local
+    @Provides
+    @Singleton
+    fun provideCineTixDb(@ApplicationContext appContext: Context): CineTixDb {
+        return Room.databaseBuilder(
+            appContext,
+            CineTixDb::class.java,
+            "CineTix.db"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWatchListDao(database: CineTixDb) = database.watchListDao()
 }

@@ -102,7 +102,7 @@ fun SearchScreen(
                     items(searchResult) { films ->
                         films?.let {
                             SearchResultItem(
-                                title = films.title,
+                                title = films.title ?: films.titleSeries,
                                 mediaType = films.mediaType,
                                 posterImage = "$BASE_POSTER_IMAGE_URL/${films.posterPath}",
                                 genres = uiState.filmGenres.filter { genre ->
@@ -110,7 +110,7 @@ fun SearchScreen(
                                     else films.genreIds.contains(genre.id)
                                 },
                                 rating = (films.voteAverage ?: 0).toDouble(),
-                                releaseYear = films.releaseDate,
+                                releaseYear = films.releaseDate ?: films.releaseDateSeries,
                                 onClick = {}
                             )
                         }

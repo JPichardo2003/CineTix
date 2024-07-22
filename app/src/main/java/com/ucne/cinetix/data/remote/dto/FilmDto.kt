@@ -1,40 +1,44 @@
 package com.ucne.cinetix.data.remote.dto
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class FilmDto(
-    @SerializedName("adult")
+    @Json(name="adult")
     val adult: Boolean,
-    @SerializedName("backdrop_path")
+    @Json(name="backdrop_path")
     val backdropPath: String?,
-    @SerializedName("poster_path")
+    @Json(name="poster_path")
     val posterPath: String?,
-    @SerializedName("genre_ids")
+    @Json(name="genre_ids")
     val genreIds: List<Int>?,
-    @SerializedName("genres")
+    @Json(name="genres")
     val genres: List<GenreDto>?,
-    @SerializedName("media_type")
+    @Json(name="media_type")
     val mediaType: String?,
-    @SerializedName("id")
+    @Json(name="id")
     val id: Int,
-    @SerializedName("imdb_id")
+    @Json(name="imdb_id")
     val imdbId: String?,
-    @SerializedName("original_language")
+    @Json(name="original_language")
     val originalLanguage: String,
-    @SerializedName("overview")
+    @Json(name="overview")
     val overview: String,
-    @SerializedName("popularity")
+    @Json(name="popularity")
     val popularity: Double,
-    @SerializedName("release_date", alternate = ["first_air_date"])
-    val releaseDate: String,
-    @SerializedName("runtime")
+    @Json(name = "release_date")
+    val releaseDate: String?,
+    @Json(name = "first_air_date")
+    val releaseDateSeries: String?,//Alternative Name
+    @Json(name="runtime")
     val runtime: Int?,
-    @SerializedName("title", alternate = ["name"])
-    val title: String,
-    @SerializedName("video")
-    val video: Boolean,
-    @SerializedName("vote_average")
+    @Json(name="title")
+    val title: String?,
+    @Json(name="name")//Alternative Name
+    val titleSeries: String?,
+    @Json(name="video")
+    val video: Boolean?,
+    @Json(name="vote_average")
     val voteAverage: Double,
-    @SerializedName("vote_count")
+    @Json(name="vote_count")
     val voteCount: Int
 )

@@ -1,5 +1,7 @@
 package com.ucne.cinetix.presentation.moviedetails
 
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Shop
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,12 +55,13 @@ import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
+import com.ucne.cinetix.data.local.entities.WatchListEntity
 import com.ucne.cinetix.data.remote.dto.FilmDto
-import com.ucne.cinetix.data.remote.dto.GenreDto
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.presentation.components.ExpandableText
 import com.ucne.cinetix.presentation.components.MovieGenreLabel
 import com.ucne.cinetix.presentation.home.HomeViewModel
+import com.ucne.cinetix.presentation.watchlist.WatchListViewModel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
@@ -63,38 +70,64 @@ import com.ucne.cinetix.ui.theme.rememberGradientColors
 import com.ucne.cinetix.util.Constants.BASE_BACKDROP_IMAGE_URL
 import com.ucne.cinetix.util.Constants.BASE_POSTER_IMAGE_URL
 import com.ucne.cinetix.util.FilmType
-
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Composable
 fun FilmDetailsScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
     detailsViewModel: FilmDetailsViewModel = hiltViewModel(),
+    watchListViewModel: WatchListViewModel = hiltViewModel(),
     filmId: Int,
     selectedFilm: Int,
-    goToHomeScreen: () -> Unit
+    goToHomeScreen: () -> Unit,
+    goToWatchListScreen: () -> Unit,
+    refreshPage: (Int, Int) -> Unit
 ) {
+    val backgroundColors = rememberGradientColors()
+
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val detailsUiState by detailsViewModel.uiState.collectAsStateWithLifecycle()
+    val watchListUiState by watchListViewModel.uiState.collectAsStateWithLifecycle()
 
-    val backgroundColors = rememberGradientColors()
     var film by remember { mutableStateOf<FilmDto?>(null) }
 
+    val date = SimpleDateFormat.getDateTimeInstance().format(Date())
+    val watchListMovie = film?.let {
+        WatchListEntity(
+            watchListId = it.id,
+            mediaType = if(selectedFilm == 1) "movie" else "tv",
+            imagePath = film!!.posterPath,
+            title = film?.title ?: film?.titleSeries ?: "TBA",
+            releaseDate = film?.releaseDate ?: film?.releaseDateSeries ?: "TBA",
+            rating = film?.voteAverage ?: 0.0,
+            addedOn = date
+        )
+    }
+
+    val addedToList = watchListUiState.addedToWatchList
     val similarFilms = detailsUiState.similarFilms.collectAsLazyPagingItems()
 
     LaunchedEffect(key1 = filmId) {
-        if(selectedFilm == 1){homeViewModel.getMovieDetails(movieId = filmId)}
-        else{homeViewModel.getTvShowDetails(tvShowId = filmId)}
+        if(selectedFilm == 1){
+            homeViewModel.getMovieDetails(movieId = filmId)}
+        else {
+            homeViewModel.getTvShowDetails(tvShowId = filmId)
+        }
+        homeViewModel.getFilmGenre(
+            filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES
+        )
     }
 
-    if(selectedFilm == 1){
-        LaunchedEffect(key1 = uiState.movieDetails) {
-            film = uiState.movieDetails
-            detailsViewModel.getSimilarFilms(filmId = filmId, filmType = FilmType.MOVIE)
+    LaunchedEffect(uiState) {
+        film = when (selectedFilm) {
+            1 -> uiState.movieDetails
+            else -> uiState.tvShowDetails
         }
-    }else{
-        LaunchedEffect(key1 = uiState.tvShowDetails) {
-            film = uiState.tvShowDetails
-            detailsViewModel.getSimilarFilms(filmId = filmId, filmType = FilmType.SERIES)
+        film?.let {
+            detailsViewModel.getSimilarFilms(filmId = it.id,
+                filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES)
+            watchListViewModel.exists(it.id)
         }
     }
 
@@ -199,8 +232,8 @@ fun FilmDetailsScreen(
                     ) {
                         Text(
                             text = when (selectedFilm) {
-                                2 -> "Series"
                                 1 -> "Movie"
+                                2 -> "Series"
                                 else -> ""
                             },
                             modifier = Modifier
@@ -213,7 +246,7 @@ fun FilmDetailsScreen(
                     }
 
                     Text(
-                        text = film!!.title,
+                        text = film?.title ?: film?.titleSeries ?: "TBA",
                         modifier = Modifier
                             .padding(top = 2.dp, start = 4.dp, bottom = 4.dp)
                             .fillMaxWidth(0.5F),
@@ -224,7 +257,7 @@ fun FilmDetailsScreen(
                     )
 
                     Text(
-                        text = film!!.releaseDate,
+                        text = film?.releaseDate ?: film?.releaseDateSeries ?: "TBA",
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
                         fontSize = 15.sp,
                         fontWeight = Light,
@@ -247,6 +280,52 @@ fun FilmDetailsScreen(
                         onValueChange = {},
                         onRatingChanged = {}
                     )
+
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(start = 4.dp, bottom = 8.dp)
+                            .fillMaxWidth(0.42F),
+                    ) {
+                        val context = LocalContext.current
+                        IconButton(onClick = {
+                            if (addedToList != 0) {
+                                watchListViewModel.removeFromWatchList(watchListMovie!!.watchListId)
+
+                                Toast.makeText(
+                                    context, "Removed from watchlist", LENGTH_SHORT
+                                ).show()
+
+                            } else {
+                                if (watchListMovie != null) {
+                                    watchListViewModel.addToWatchList(watchListMovie)
+                                }
+                                Toast.makeText(
+                                    context, "Added to watchlist", LENGTH_SHORT
+                                ).show()
+                            }
+                        }) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (addedToList != 0) R.drawable.ic_added_to_list
+                                    else R.drawable.ic_add_to_list/*TODO: Agregar icono para navegar a la wishlist y que addedtList sea 0 cuando se presione un similarfilm*/
+                                ),
+                                tint = AppOnPrimaryColor,
+                                contentDescription = "add to watch list icon",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = goToWatchListScreen
+                        ) {
+                            Icon(
+                            imageVector = Icons.Rounded.Shop,
+                                tint = AppOnPrimaryColor,
+                                contentDescription = "watchlist icon"
+                            )
+                        }
+                    }
                 }
 
                 CoilImage(
@@ -290,11 +369,10 @@ fun FilmDetailsScreen(
                     .padding(top = (96).dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                     .fillMaxWidth()
             ) {
-                val filmGenres: List<GenreDto> = uiState.filmGenres.filter { genre ->
-                    return@filter if (film!!.genreIds.isNullOrEmpty()) false else
-                        film!!.genreIds!!.contains(genre.id)
+                val genreList = uiState.filmGenres.filter { genre ->
+                    film?.genres?.any { it.id == genre.id } ?: false
                 }
-                filmGenres.forEach { genre ->
+                genreList.forEach { genre -> /*TODO: QUE CARGUE LOS GENEROS AL INICIO*/
                     item {
                         MovieGenreLabel(
                             background = ButtonColor,
@@ -359,7 +437,7 @@ fun FilmDetailsScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .size(130.dp, 195.dp)
                                     .clickable {
-                                        film = thisMovie
+                                        refreshPage(thisMovie.id, selectedFilm) /*TODO: QUE CARGUE UN FILMDTO NUEVO*/
                                     },
                                 contentDescription = "Movie item"
                             )

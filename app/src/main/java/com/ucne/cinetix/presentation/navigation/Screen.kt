@@ -13,5 +13,8 @@ sealed class Screen {
     data object Search : Screen()
 
     @Serializable
+    data object WatchList : Screen()
+
+    @Serializable
     data class MovieDetails(val filmId: Int, val selectedFilmType: Int) : Screen()
 }

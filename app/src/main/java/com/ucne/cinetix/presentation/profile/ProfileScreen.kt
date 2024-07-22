@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Shop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -48,11 +50,13 @@ import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
+import com.ucne.cinetix.ui.theme.CineTixTheme
 import com.ucne.cinetix.ui.theme.rememberGradientColors
 
 @Composable
 fun ProfileScreen(
-    goToHomeScreen: () -> Unit
+    goToHomeScreen: () -> Unit,
+    goToWatchListScreen: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -191,7 +195,7 @@ fun ProfileScreen(
                         start.linkTo(topBgImage.start, margin = 28.dp)
                         bottom.linkTo(topBgImage.bottom)
                     },
-                contentDescription = null
+                contentDescription = "Foto de perfil"
             )
 
             // Nombre de usuario
@@ -207,7 +211,7 @@ fun ProfileScreen(
                 }
             )
 
-            // Botón de lista de deseos
+            // Watch List Button
             Button(
                 modifier = Modifier
                     .constrainAs(btnWatchList) {
@@ -219,8 +223,11 @@ fun ProfileScreen(
                     containerColor = Color(0xFF4C3D6D),
                     contentColor = AppOnPrimaryColor
                 ),
-                onClick = {}
+                onClick = {
+                    goToWatchListScreen()
+                }
             ) {
+                Icon(imageVector = Icons.Rounded.Shop, contentDescription = "Watch List")
                 Text(text = "WatchList")
             }
 
@@ -241,7 +248,7 @@ fun ProfileScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "version: 1.5",
+                    text = "version: 1.6",
                     fontWeight = FontWeight.Light,
                     fontSize = 14.sp,
                     color = AppOnPrimaryColor.copy(alpha = 0.5F)
@@ -341,6 +348,17 @@ fun ProfileTextField(
                 focusedIndicatorColor = Color.White,
                 unfocusedIndicatorColor = Color.White
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ProfileScreenPreview() {
+    CineTixTheme {
+        ProfileScreen(
+            goToHomeScreen = {},
+            goToWatchListScreen = {}
         )
     }
 }

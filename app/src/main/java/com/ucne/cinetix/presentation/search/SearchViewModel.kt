@@ -38,7 +38,7 @@ class SearchViewModel @Inject constructor(
                 val flow = searchRepository.multiSearch(uiState.value.searchParam)
                     .map { result ->
                         result.filter { movie ->
-                            ((movie.title != null || movie.originalName != null
+                            ((movie.titleSeries != null || movie.title != null || movie.originalName != null
                                     || movie.originalTitle != null) &&
                                     (movie.mediaType == "tv" || movie.mediaType == "movie"))
                         }

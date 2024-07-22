@@ -1,47 +1,51 @@
 package com.ucne.cinetix.data.remote.dto
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 //Es lo mismo que FilmDto pero en esta clase all es nullable
 data class SearchDto(
-    @SerializedName("adult")
+    @Json(name="adult")
     val adult: Boolean?,
-    @SerializedName("backdrop_path")
+    @Json(name="backdrop_path")
     val backdropPath: String?,
-    @SerializedName("genre_ids")
+    @Json(name="genre_ids")
     val genreIds: List<Int>?,
-    @SerializedName("genres")
+    @Json(name="genres")
     val genres: List<GenreDto>?,
-    @SerializedName("id")
+    @Json(name="id")
     val id: Int?,
-    @SerializedName("imdb_id")
+    @Json(name="imdb_id")
     val imdbId: String?,
-    @SerializedName("media_type")
+    @Json(name="media_type")
     val mediaType: String?,
-    @SerializedName("origin_country")
+    @Json(name="origin_country")
     val originCountry: List<String>?,
-    @SerializedName("original_language")
+    @Json(name="original_language")
     val originalLanguage: String?,
-    @SerializedName("original_name")
+    @Json(name="original_name")
     val originalName: String?,
-    @SerializedName("original_title")
+    @Json(name="original_title")
     val originalTitle: String?,
-    @SerializedName("overview")
+    @Json(name="overview")
     val overview: String?,
-    @SerializedName("popularity")
+    @Json(name="popularity")
     val popularity: Double?,
-    @SerializedName("poster_path")
+    @Json(name="poster_path")
     val posterPath: String?,
-    @SerializedName("release_date", alternate = ["first_air_date"])
+    @Json(name="release_date")
     val releaseDate: String?,
-    @SerializedName("title", alternate = ["name"])
+    @Json(name = "first_air_date") //Alternative Name
+    val releaseDateSeries: String?,
+    @Json(name="title")
     val title: String?,
-    @SerializedName("video")
+    @Json(name="name")//Alternative Name
+    val titleSeries: String?,
+    @Json(name="video")
     val video: Boolean?,
-    @SerializedName("runtime")
+    @Json(name="runtime")
     val runtime: Int?,
-    @SerializedName("vote_average")
+    @Json(name="vote_average")
     val voteAverage: Double?,
-    @SerializedName("vote_count")
+    @Json(name="vote_count")
     val voteCount: Int?
 )

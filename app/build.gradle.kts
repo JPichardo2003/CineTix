@@ -109,9 +109,6 @@ dependencies {
     //Pagination
     implementation("androidx.paging:paging-compose:1.0.0-alpha15")
 
-    //Timber
-    implementation("com.jakewharton.timber:timber:5.0.1")
-
     //coil
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.github.skydoves:landscapist-coil:1.4.9")

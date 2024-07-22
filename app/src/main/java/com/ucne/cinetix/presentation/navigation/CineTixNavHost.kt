@@ -9,6 +9,7 @@ import com.ucne.cinetix.presentation.home.HomeScreen
 import com.ucne.cinetix.presentation.moviedetails.FilmDetailsScreen
 import com.ucne.cinetix.presentation.profile.ProfileScreen
 import com.ucne.cinetix.presentation.search.SearchScreen
+import com.ucne.cinetix.presentation.watchlist.WatchListScreen
 
 @Composable
 fun CineTixNavHost(
@@ -35,6 +36,9 @@ fun CineTixNavHost(
             ProfileScreen(
                 goToHomeScreen = {
                     navHostController.navigate(Screen.Home)
+                },
+                goToWatchListScreen = {
+                    navHostController.navigate(Screen.WatchList)
                 }
             )
         }
@@ -50,7 +54,21 @@ fun CineTixNavHost(
             FilmDetailsScreen(
                 filmId = args.filmId,
                 selectedFilm = args.selectedFilmType,
-                goToHomeScreen = { navHostController.navigate(Screen.Home) }
+                goToHomeScreen = { navHostController.navigate(Screen.Home) },
+                goToWatchListScreen = { navHostController.navigate(Screen.WatchList) },
+                refreshPage = { id, filmType ->
+                    navHostController.navigate(Screen.MovieDetails(id, filmType))
+                }
+            )
+        }
+        composable<Screen.WatchList> {
+            WatchListScreen(
+                goToHomeScreen = {
+                    navHostController.navigate(Screen.Home)
+                },
+                goToProfileScreen = {
+                    navHostController.navigate(Screen.Profile)
+                }
             )
         }
     }

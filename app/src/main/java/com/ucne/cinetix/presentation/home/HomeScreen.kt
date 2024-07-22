@@ -349,7 +349,7 @@ private fun ScrollableMovieItems(
                             MovieItem(
                                 landscape = landscape,
                                 imageUrl = imageUrl,
-                                title = film.title,
+                                title = film.title ?: film.titleSeries ?: "No title",
                                 modifier = Modifier
                                     .width(if (landscape) 215.dp else 130.dp)
                                     .height(if (landscape) 161.25.dp else 195.dp)
