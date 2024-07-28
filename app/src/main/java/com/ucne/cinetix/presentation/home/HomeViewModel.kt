@@ -193,28 +193,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getMovieDetails(movieId: Int) {
-        viewModelScope.launch {
-            try {
-                val movieDetails = filmRepository.getMovieDetails(movieId)
-                _uiState.update { it.copy(movieDetails = movieDetails) }
-            } catch (e: Exception) {
-                Log.e("Error", "Error fetching movie details")
-            }
-        }
-    }
-
-    fun getTvShowDetails(tvShowId: Int) {
-        viewModelScope.launch {
-            try {
-                val tvShowDetails = filmRepository.getTvShowDetails(tvShowId)
-                _uiState.update { it.copy(tvShowDetails = tvShowDetails) }
-            } catch (e: Exception) {
-                Log.e("Error", "Error fetching tv show details")
-            }
-        }
-    }
-
     fun onGenreChanged(genre: GenreDto) {
         _uiState.update { it.copy(selectedGenre = genre) }
     }
@@ -239,5 +217,3 @@ data class HomeUIState(
     val movieDetails: FilmDto? = null,
     val tvShowDetails: FilmDto? = null
 )
-
-

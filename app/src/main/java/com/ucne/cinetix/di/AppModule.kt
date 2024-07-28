@@ -53,4 +53,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideWatchListDao(database: CineTixDb) = database.watchListDao()
+    @Provides
+    @Singleton
+    fun provideCineTixDao(database: CineTixDb) = database.cineTixDao()
 }

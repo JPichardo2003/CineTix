@@ -1,6 +1,8 @@
 package com.ucne.cinetix.data.remote.dto
 
 import com.squareup.moshi.Json
+import com.ucne.cinetix.data.local.entities.FilmEntity
+import com.ucne.cinetix.data.local.entities.GenreEntity
 
 data class FilmDto(
     @Json(name="adult")
@@ -41,4 +43,39 @@ data class FilmDto(
     val voteAverage: Double,
     @Json(name="vote_count")
     val voteCount: Int
+)
+
+fun FilmDto.toEntity(): FilmEntity {
+    return FilmEntity(
+        adult = this.adult,
+        backdropPath = this.backdropPath,
+        posterPath = this.posterPath,
+        genreIds = this.genreIds,
+        genres = this.genres?.map { GenreEntity(it.id, it.name) },
+        mediaType = this.mediaType,
+        id = this.id,
+        imdbId = this.imdbId,
+        originalLanguage = this.originalLanguage,
+        overview = this.overview,
+        popularity = this.popularity,
+        releaseDate = this.releaseDate,
+        releaseDateSeries = this.releaseDateSeries,
+        runtime = this.runtime,
+        title = this.title,
+        titleSeries = this.titleSeries,
+        video = this.video,
+        voteAverage = this.voteAverage,
+        voteCount = this.voteCount
+    )
+}
+
+data class FilmResponse(
+    @Json(name="page")
+    val page: Int,
+    @Json(name="results")
+    val results: List<FilmDto>,
+    @Json(name="total_pages")
+    val totalPages: Int,
+    @Json(name="total_results")
+    val totalResults: Int
 )

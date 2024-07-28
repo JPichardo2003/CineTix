@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import com.ucne.cinetix.data.remote.dto.GenreDto
 import com.ucne.cinetix.data.remote.dto.SearchDto
 import com.ucne.cinetix.data.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,6 +56,7 @@ class SearchViewModel @Inject constructor(
 
 data class SearchUIState(
     var searchParam: String = "",
+    val filmGenres: List<GenreDto> = listOf(GenreDto(null, "All")),
     val multiSearch: Flow<PagingData<SearchDto>> = emptyFlow(),
     var isLoading: Boolean = false
 )

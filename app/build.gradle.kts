@@ -6,8 +6,6 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.kotlinx.serialization)
     id("com.google.dagger.hilt.android")
-    //Parcelize
-    id("kotlin-parcelize")
 }
 val properties = Properties()
 properties.load(project.rootProject.file("local.properties").inputStream())
@@ -108,6 +106,9 @@ dependencies {
 
     //Pagination
     implementation("androidx.paging:paging-compose:1.0.0-alpha15")
+
+    //RoomPaging
+    implementation("androidx.room:room-paging:2.5.0-alpha01")
 
     //coil
     implementation("io.coil-kt:coil-compose:2.4.0")

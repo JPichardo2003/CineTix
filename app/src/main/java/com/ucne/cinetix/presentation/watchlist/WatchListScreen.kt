@@ -1,9 +1,7 @@
 package com.ucne.cinetix.presentation.watchlist
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +19,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,7 +30,6 @@ import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,9 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.local.entities.WatchListEntity
 import com.ucne.cinetix.presentation.components.BackButton
-import com.ucne.cinetix.presentation.search.SearchBar
 import com.ucne.cinetix.presentation.search.SearchResultItem
-import com.ucne.cinetix.presentation.search.SearchViewModel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
 import com.ucne.cinetix.ui.theme.rememberGradientColors
@@ -62,26 +58,14 @@ import kotlinx.coroutines.flow.first
 @Composable
 fun WatchListScreen(
     watchListViewModel: WatchListViewModel = hiltViewModel(),
-    searchViewModel: SearchViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit,
     goToProfileScreen: () -> Unit,
 ) {
     val watchListState by watchListViewModel.uiState.collectAsStateWithLifecycle()
-    val searchState by searchViewModel.uiState.collectAsStateWithLifecycle()
     var currentList by remember { mutableStateOf<List<WatchListEntity>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         currentList = watchListState.watchList.first()
-    }
-    LaunchedEffect(searchState.searchParam) {
-        currentList = if (searchState.searchParam.isEmpty()) {
-            watchListState.watchList.first()
-        } else {
-            watchListState.watchList.first().filter { movie ->
-                movie.title?.contains(other = searchState.searchParam, ignoreCase = true) ?: false
-            }
-        }
-        Log.e("Filtered by", "${searchState.searchParam}: ${currentList.size}")
     }
 
     Column(
@@ -105,7 +89,7 @@ fun WatchListScreen(
             }
 
             Text(
-                text = "My Watch list",
+                text = "My WatchList",
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp,
@@ -127,61 +111,40 @@ fun WatchListScreen(
             }
         }
 
-        SearchBar(
-            searchParam = searchState.searchParam,
-            onSearch = {
-                searchViewModel.searchRemoteMovie()
-            },
-            onSearchParamChanged = {
-                searchViewModel.onSearchParamChanged(it)
-            }
-        )
-
         fun countItems(items: Int): String {
             return when (items) {
-                1 -> "Found 1 item"
                 0 -> "There's nothing here!"
-                else -> "Found $items items"
+                else -> "Films: $items"
             }
         }
 
         var openDialog by remember { mutableStateOf(false) }
         val showNumberIndicator by remember { mutableStateOf(true) }
         AnimatedVisibility(visible = showNumberIndicator) {
-            Box(
-                contentAlignment = Alignment.Center,
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .padding(8.dp)
                     .fillMaxWidth()
-                    .padding(12.dp)
-                    .border(
-                        width = 1.dp, color = ButtonColor,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .background(ButtonColor.copy(alpha = 0.25F))
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth()
+                Text(
+                    text = countItems(currentList.size),
+                    color = AppOnPrimaryColor
+                )
+                IconButton(
+                    onClick = { openDialog = true }
                 ) {
-                    Text(
-                        text = countItems(currentList.size),
-                        color = AppOnPrimaryColor
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_clean),
+                        tint = AppOnPrimaryColor,
+                        contentDescription = "Clean button"
                     )
-                    IconButton(
-                        onClick = { openDialog = true }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_cancel),
-                            tint = AppOnPrimaryColor,
-                            contentDescription = "Cancel button"
-                        )
-                    }
                 }
             }
         }
+
+        Divider()
 
         LazyColumn(
             modifier = Modifier
@@ -207,7 +170,7 @@ fun WatchListScreen(
             }
         }
 
-        if (openDialog && currentList.size > 1) {
+        if (openDialog && currentList.isNotEmpty()) {
             AlertDialog(
                 title = { Text(text = "Delete All", color = AppOnPrimaryColor) },
                 text = { Text(text = "Would you like to clear your watch list?") },
@@ -230,7 +193,8 @@ fun WatchListScreen(
                 textContentColor = AppOnPrimaryColor,
                 onDismissRequest = {
                     openDialog = false
-                })
+                }
+            )
         }
     }
 }

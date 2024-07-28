@@ -60,8 +60,6 @@ import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.presentation.components.ExpandableText
 import com.ucne.cinetix.presentation.components.MovieGenreLabel
-import com.ucne.cinetix.presentation.home.HomeViewModel
-import com.ucne.cinetix.presentation.watchlist.WatchListViewModel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
@@ -75,9 +73,7 @@ import java.util.Date
 
 @Composable
 fun FilmDetailsScreen(
-    homeViewModel: HomeViewModel = hiltViewModel(),
     detailsViewModel: FilmDetailsViewModel = hiltViewModel(),
-    watchListViewModel: WatchListViewModel = hiltViewModel(),
     filmId: Int,
     selectedFilm: Int,
     goToHomeScreen: () -> Unit,
@@ -85,13 +81,8 @@ fun FilmDetailsScreen(
     refreshPage: (Int, Int) -> Unit
 ) {
     val backgroundColors = rememberGradientColors()
-
-    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val detailsUiState by detailsViewModel.uiState.collectAsStateWithLifecycle()
-    val watchListUiState by watchListViewModel.uiState.collectAsStateWithLifecycle()
-
     var film by remember { mutableStateOf<FilmDto?>(null) }
-
     val date = SimpleDateFormat.getDateTimeInstance().format(Date())
     val watchListMovie = film?.let {
         WatchListEntity(
@@ -104,30 +95,29 @@ fun FilmDetailsScreen(
             addedOn = date
         )
     }
-
-    val addedToList = watchListUiState.addedToWatchList
+    val addedToList = detailsUiState.addedToWatchList
     val similarFilms = detailsUiState.similarFilms.collectAsLazyPagingItems()
 
     LaunchedEffect(key1 = filmId) {
         if(selectedFilm == 1){
-            homeViewModel.getMovieDetails(movieId = filmId)}
+            detailsViewModel.getMovieDetails(movieId = filmId)}
         else {
-            homeViewModel.getTvShowDetails(tvShowId = filmId)
+            detailsViewModel.getTvShowDetails(tvShowId = filmId)
         }
-        homeViewModel.getFilmGenre(
+        detailsViewModel.getFilmGenre(
             filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES
         )
     }
 
-    LaunchedEffect(uiState) {
+    LaunchedEffect(detailsUiState) {
         film = when (selectedFilm) {
-            1 -> uiState.movieDetails
-            else -> uiState.tvShowDetails
+            1 -> detailsUiState.movieDetails
+            else -> detailsUiState.tvShowDetails
         }
         film?.let {
             detailsViewModel.getSimilarFilms(filmId = it.id,
                 filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES)
-            watchListViewModel.exists(it.id)
+            detailsViewModel.exists(it.id)
         }
     }
 
@@ -291,7 +281,7 @@ fun FilmDetailsScreen(
                         val context = LocalContext.current
                         IconButton(onClick = {
                             if (addedToList != 0) {
-                                watchListViewModel.removeFromWatchList(watchListMovie!!.watchListId)
+                                detailsViewModel.removeFromWatchList(watchListMovie!!.watchListId)
 
                                 Toast.makeText(
                                     context, "Removed from watchlist", LENGTH_SHORT
@@ -299,7 +289,7 @@ fun FilmDetailsScreen(
 
                             } else {
                                 if (watchListMovie != null) {
-                                    watchListViewModel.addToWatchList(watchListMovie)
+                                    detailsViewModel.addToWatchList(watchListMovie)
                                 }
                                 Toast.makeText(
                                     context, "Added to watchlist", LENGTH_SHORT
@@ -309,7 +299,7 @@ fun FilmDetailsScreen(
                             Icon(
                                 painter = painterResource(
                                     id = if (addedToList != 0) R.drawable.ic_added_to_list
-                                    else R.drawable.ic_add_to_list/*TODO: Agregar icono para navegar a la wishlist y que addedtList sea 0 cuando se presione un similarfilm*/
+                                    else R.drawable.ic_add_to_list
                                 ),
                                 tint = AppOnPrimaryColor,
                                 contentDescription = "add to watch list icon",
@@ -369,10 +359,10 @@ fun FilmDetailsScreen(
                     .padding(top = (96).dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                     .fillMaxWidth()
             ) {
-                val genreList = uiState.filmGenres.filter { genre ->
+                val genreList = detailsUiState.filmGenres.filter { genre ->
                     film?.genres?.any { it.id == genre.id } ?: false
                 }
-                genreList.forEach { genre -> /*TODO: QUE CARGUE LOS GENEROS AL INICIO*/
+                genreList.forEach { genre ->
                     item {
                         MovieGenreLabel(
                             background = ButtonColor,
@@ -437,7 +427,7 @@ fun FilmDetailsScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .size(130.dp, 195.dp)
                                     .clickable {
-                                        refreshPage(thisMovie.id, selectedFilm) /*TODO: QUE CARGUE UN FILMDTO NUEVO*/
+                                        refreshPage(thisMovie.id, selectedFilm)
                                     },
                                 contentDescription = "Movie item"
                             )

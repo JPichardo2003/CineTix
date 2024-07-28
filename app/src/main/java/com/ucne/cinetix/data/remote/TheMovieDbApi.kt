@@ -1,9 +1,9 @@
 package com.ucne.cinetix.data.remote
 
 import com.ucne.cinetix.data.remote.dto.FilmDto
-import com.ucne.cinetix.data.remote.response.FilmResponse
-import com.ucne.cinetix.data.remote.response.GenreResponse
-import com.ucne.cinetix.data.remote.response.MultiSearchResponse
+import com.ucne.cinetix.data.remote.dto.FilmResponse
+import com.ucne.cinetix.data.remote.dto.GenreResponse
+import com.ucne.cinetix.data.remote.dto.MultiSearchResponse
 import com.ucne.cinetix.util.Constants
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -159,5 +159,4 @@ interface TheMovieDbApi {
         @Query("api_key") apiKey: String = Constants.API_KEY,
         @Query("language") language: String = Constants.LANGUAGE_COUNTRY_CODE
     ): FilmDto
-
 }

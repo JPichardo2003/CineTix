@@ -40,10 +40,8 @@ import com.ucne.cinetix.util.Constants.BASE_POSTER_IMAGE_URL
 @Composable
 fun SearchScreen(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit
 ) {
-    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val searchUiState by searchViewModel.uiState.collectAsStateWithLifecycle()
     val searchResult = searchUiState.multiSearch.collectAsLazyPagingItems()
     val gradientsColors = rememberGradientColors()
@@ -105,9 +103,8 @@ fun SearchScreen(
                                 title = films.title ?: films.titleSeries,
                                 mediaType = films.mediaType,
                                 posterImage = "$BASE_POSTER_IMAGE_URL/${films.posterPath}",
-                                genres = uiState.filmGenres.filter { genre ->
-                                    return@filter if (films.genreIds.isNullOrEmpty()) false
-                                    else films.genreIds.contains(genre.id)
+                                genres = searchUiState.filmGenres.filter { genre ->
+                                    films.genres?.any { it.id == genre.id } ?: false
                                 },
                                 rating = (films.voteAverage ?: 0).toDouble(),
                                 releaseYear = films.releaseDate ?: films.releaseDateSeries,
