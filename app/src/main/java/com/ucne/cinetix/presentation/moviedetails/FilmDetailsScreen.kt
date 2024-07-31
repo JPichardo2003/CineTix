@@ -55,6 +55,7 @@ import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
+import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
 import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.BackButton
@@ -82,7 +83,7 @@ fun FilmDetailsScreen(
 ) {
     val backgroundColors = rememberGradientColors()
     val detailsUiState by detailsViewModel.uiState.collectAsStateWithLifecycle()
-    var film by remember { mutableStateOf<FilmDto?>(null) }
+    var film by remember { mutableStateOf<FilmEntity?>(null) }
     val date = SimpleDateFormat.getDateTimeInstance().format(Date())
     val watchListMovie = film?.let {
         WatchListEntity(
@@ -100,23 +101,22 @@ fun FilmDetailsScreen(
 
     LaunchedEffect(key1 = filmId) {
         if(selectedFilm == 1){
-            detailsViewModel.getMovieDetails(movieId = filmId)}
+            detailsViewModel.getFilmById(filmId = filmId, filmType = FilmType.MOVIE) }
         else {
-            detailsViewModel.getTvShowDetails(tvShowId = filmId)
+            detailsViewModel.getFilmById(filmId = filmId, filmType = FilmType.TV)
         }
         detailsViewModel.getFilmGenre(
-            filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES
+            filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
         )
     }
 
     LaunchedEffect(detailsUiState) {
-        film = when (selectedFilm) {
-            1 -> detailsUiState.movieDetails
-            else -> detailsUiState.tvShowDetails
-        }
+        film = detailsUiState.film
         film?.let {
-            detailsViewModel.getSimilarFilms(filmId = it.id,
-                filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.SERIES)
+            detailsViewModel.getSimilarFilms(
+                filmId = it.id,
+                filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
+            )
             detailsViewModel.exists(it.id)
         }
     }
@@ -359,9 +359,8 @@ fun FilmDetailsScreen(
                     .padding(top = (96).dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                     .fillMaxWidth()
             ) {
-                val genreList = detailsUiState.filmGenres.filter { genre ->
-                    film?.genres?.any { it.id == genre.id } ?: false
-                }
+                val genreList = detailsUiState.filmGenres.filter { genres ->
+                    genres.id in (film!!.genreIds ?: emptyList()) }
                 genreList.forEach { genre ->
                     item {
                         MovieGenreLabel(

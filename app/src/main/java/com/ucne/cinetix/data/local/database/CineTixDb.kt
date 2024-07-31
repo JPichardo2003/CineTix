@@ -18,7 +18,7 @@ import com.ucne.cinetix.data.local.typeconverters.Converters
         SearchEntity::class,
         WatchListEntity::class
     ],
-    version = 4,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

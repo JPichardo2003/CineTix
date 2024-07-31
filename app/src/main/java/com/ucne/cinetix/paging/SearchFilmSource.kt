@@ -3,6 +3,7 @@ package com.ucne.cinetix.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.ucne.cinetix.data.remote.TheMovieDbApi
+import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.data.remote.dto.SearchDto
 import retrofit2.HttpException
 import java.io.IOException
@@ -10,10 +11,10 @@ import java.io.IOException
 class SearchFilmSource(
     private val theMovieDbApi: TheMovieDbApi,
     private val searchParams: String
-) : PagingSource<Int, SearchDto>() {
-    override fun getRefreshKey(state: PagingState<Int, SearchDto>): Int? = state.anchorPosition
+) : PagingSource<Int, FilmDto>() {
+    override fun getRefreshKey(state: PagingState<Int, FilmDto>): Int? = state.anchorPosition
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SearchDto> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmDto> {
         return try {
             val nextPage = params.key ?: 1
             val searchMovies = theMovieDbApi.multiSearch(

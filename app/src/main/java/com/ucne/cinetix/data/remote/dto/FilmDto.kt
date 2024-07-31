@@ -3,6 +3,7 @@ package com.ucne.cinetix.data.remote.dto
 import com.squareup.moshi.Json
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
+import com.ucne.cinetix.util.FilmType
 
 data class FilmDto(
     @Json(name="adult")
@@ -22,11 +23,11 @@ data class FilmDto(
     @Json(name="imdb_id")
     val imdbId: String?,
     @Json(name="original_language")
-    val originalLanguage: String,
+    val originalLanguage: String?,
     @Json(name="overview")
-    val overview: String,
+    val overview: String?,
     @Json(name="popularity")
-    val popularity: Double,
+    val popularity: Double?,
     @Json(name = "release_date")
     val releaseDate: String?,
     @Json(name = "first_air_date")
@@ -40,32 +41,32 @@ data class FilmDto(
     @Json(name="video")
     val video: Boolean?,
     @Json(name="vote_average")
-    val voteAverage: Double,
+    val voteAverage: Double?,
     @Json(name="vote_count")
-    val voteCount: Int
+    val voteCount: Int?
 )
 
-fun FilmDto.toEntity(): FilmEntity {
+fun FilmDto.toEntity(filmType: FilmType): FilmEntity {
     return FilmEntity(
         adult = this.adult,
         backdropPath = this.backdropPath,
         posterPath = this.posterPath,
         genreIds = this.genreIds,
         genres = this.genres?.map { GenreEntity(it.id, it.name) },
-        mediaType = this.mediaType,
+        mediaType = filmType.name.lowercase(),
         id = this.id,
         imdbId = this.imdbId,
-        originalLanguage = this.originalLanguage,
-        overview = this.overview,
-        popularity = this.popularity,
+        originalLanguage = this.originalLanguage ?: "No language",
+        overview = this.overview ?: "No overview",
+        popularity = this.popularity ?: 0.0,
         releaseDate = this.releaseDate,
         releaseDateSeries = this.releaseDateSeries,
         runtime = this.runtime,
         title = this.title,
         titleSeries = this.titleSeries,
         video = this.video,
-        voteAverage = this.voteAverage,
-        voteCount = this.voteCount
+        voteAverage = this.voteAverage ?: 0.0,
+        voteCount = this.voteCount ?: 0
     )
 }
 

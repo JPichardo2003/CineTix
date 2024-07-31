@@ -94,7 +94,7 @@ private fun FilmTypeSelection(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val filmTypes = listOf(FilmType.MOVIE, FilmType.SERIES)
+        val filmTypes = listOf(FilmType.MOVIE, FilmType.TV)
         val selectedFilmType = uiState.selectedFilmType
 
         Row(

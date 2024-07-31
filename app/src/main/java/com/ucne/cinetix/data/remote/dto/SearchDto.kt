@@ -1,6 +1,10 @@
 package com.ucne.cinetix.data.remote.dto
 
 import com.squareup.moshi.Json
+import com.ucne.cinetix.data.local.entities.FilmEntity
+import com.ucne.cinetix.data.local.entities.GenreEntity
+import com.ucne.cinetix.data.local.entities.SearchEntity
+import com.ucne.cinetix.util.FilmType
 
 //Es lo mismo que FilmDto pero en esta clase all es nullable
 data class SearchDto(
@@ -50,11 +54,35 @@ data class SearchDto(
     val voteCount: Int?
 )
 
+fun SearchDto.toEntity(filmType: FilmType): FilmEntity{
+    return FilmEntity(
+        adult = this.adult ?: false,
+        backdropPath = this.backdropPath,
+        posterPath = this.posterPath,
+        genreIds = this.genreIds,
+        genres = this.genres?.map { GenreEntity(it.id, it.name) },
+        mediaType = filmType.name.lowercase(),
+        id = this.id ?: 0,
+        imdbId = this.imdbId,
+        originalLanguage = this.originalLanguage ?: "",
+        overview = this.overview ?: "",
+        popularity = this.popularity ?: 0.0,
+        releaseDate = this.releaseDate,
+        releaseDateSeries = this.releaseDateSeries,
+        runtime = this.runtime,
+        title = this.title,
+        titleSeries = this.titleSeries,
+        video = this.video,
+        voteAverage = this.voteAverage ?: 0.0,
+        voteCount = this.voteCount ?: 0
+    )
+}
+
 data class MultiSearchResponse(
     @Json(name="page")
     val page: Int,
     @Json(name="results")
-    val results: List<SearchDto>,
+    val results: List<FilmDto>,
     @Json(name="total_pages")
     val totalPages: Int,
     @Json(name="total_results")

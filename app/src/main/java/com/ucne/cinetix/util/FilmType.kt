@@ -1,5 +1,5 @@
 package com.ucne.cinetix.util
 
 enum class FilmType {
-    MOVIE, SERIES
+    MOVIE, TV
 }

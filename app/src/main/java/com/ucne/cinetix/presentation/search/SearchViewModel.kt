@@ -5,9 +5,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
+import com.ucne.cinetix.data.local.entities.FilmEntity
+import com.ucne.cinetix.data.local.entities.GenreEntity
+import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.data.remote.dto.GenreDto
 import com.ucne.cinetix.data.remote.dto.SearchDto
+import com.ucne.cinetix.data.remote.dto.toEntity
 import com.ucne.cinetix.data.repository.SearchRepository
+import com.ucne.cinetix.util.FilmType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -36,15 +42,22 @@ class SearchViewModel @Inject constructor(
             if (uiState.value.searchParam.isNotEmpty()) {
                 _uiState.update { it.copy(isLoading = true) }
                 delay(500)
-                val flow = searchRepository.multiSearch(uiState.value.searchParam)
-                    .map { result ->
-                        result.filter { movie ->
-                            ((movie.titleSeries != null || movie.title != null || movie.originalName != null
-                                    || movie.originalTitle != null) &&
-                                    (movie.mediaType == "tv" || movie.mediaType == "movie"))
-                        }
-                    }.cachedIn(viewModelScope)
-                _uiState.update { it.copy(multiSearch = flow) }
+                // Fetch data from API and store in database
+                searchRepository.getSearchApiToDb(uiState.value.searchParam)
+
+                // Fetch data from database and update UI state
+                searchFromDB()
+            }
+        }
+    }
+
+    private fun searchFromDB() {
+        viewModelScope.launch {
+            if (uiState.value.searchParam.isNotEmpty()) {
+                _uiState.update { it.copy(isLoading = true) }
+                val flow = searchRepository.searchFromDB(uiState.value.searchParam)
+                    .cachedIn(viewModelScope)
+                _uiState.update { it.copy(multiSearch = flow, isLoading = false) }
             }
         }
     }
@@ -56,7 +69,7 @@ class SearchViewModel @Inject constructor(
 
 data class SearchUIState(
     var searchParam: String = "",
-    val filmGenres: List<GenreDto> = listOf(GenreDto(null, "All")),
-    val multiSearch: Flow<PagingData<SearchDto>> = emptyFlow(),
+    val filmGenres: List<GenreEntity> = listOf(GenreEntity(null, "All")),
+    val multiSearch: Flow<PagingData<FilmEntity>> = emptyFlow(),
     var isLoading: Boolean = false
 )
