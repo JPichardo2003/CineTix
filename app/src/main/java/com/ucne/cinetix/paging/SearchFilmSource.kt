@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.ucne.cinetix.data.remote.TheMovieDbApi
 import com.ucne.cinetix.data.remote.dto.FilmDto
-import com.ucne.cinetix.data.remote.dto.SearchDto
 import retrofit2.HttpException
 import java.io.IOException
 

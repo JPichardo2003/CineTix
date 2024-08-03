@@ -11,14 +11,7 @@ import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.remote.TheMovieDbApi
 import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.data.remote.dto.toEntity
-import com.ucne.cinetix.paging.BackInTheDaysFilmSource
-import com.ucne.cinetix.paging.NowPlayingFilmSource
-import com.ucne.cinetix.paging.PopularFilmSource
 import com.ucne.cinetix.paging.RecommendedFilmSource
-import com.ucne.cinetix.paging.SimilarFilmSource
-import com.ucne.cinetix.paging.TopRatedFilmSource
-import com.ucne.cinetix.paging.TrendingFilmSource
-import com.ucne.cinetix.paging.UpcomingFilmSource
 import com.ucne.cinetix.util.Constants
 import com.ucne.cinetix.util.FilmType
 import kotlinx.coroutines.CoroutineScope
@@ -32,51 +25,6 @@ class FilmRepository @Inject constructor(
     private val theMovieDbApi: TheMovieDbApi,
     private val cineTixDao: CineTixDao
 ) {
-    // API methods using FilmDto to fill the database
-    fun getTrendingFilms(filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { TrendingFilmSource(theMovieDbApi, filmType) }
-    }
-
-    fun getPopularFilms(filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { PopularFilmSource(theMovieDbApi, filmType) }
-    }
-
-    fun getTopRatedFilm(filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { TopRatedFilmSource(theMovieDbApi, filmType) }
-    }
-
-    fun getNowPlayingFilms(filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { NowPlayingFilmSource(theMovieDbApi, filmType) }
-    }
-
-    fun getUpcomingTvShows(): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(FilmType.MOVIE) { UpcomingFilmSource(theMovieDbApi) }
-    }
-
-    fun getBackInTheDaysFilms(filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { BackInTheDaysFilmSource(theMovieDbApi, filmType) }
-    }
-
-    fun getRecommendedFilms(movieId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { RecommendedFilmSource(theMovieDbApi, filmId = movieId, filmType) }
-    }
-
-    fun getSimilarFilms(movieId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsWithDatabaseInsertion(filmType) { SimilarFilmSource(theMovieDbApi, filmId = movieId, filmType) }
-    }
-
-    suspend fun getMovieDetails(movieId: Int): FilmDto {
-        val movieDetails = theMovieDbApi.getMovieDetails(movieId = movieId)
-        insertFilmInDatabase(movieDetails, FilmType.MOVIE)
-        return movieDetails
-    }
-
-    suspend fun getTvShowDetails(seriesId: Int): FilmDto {
-        val tvShowDetails = theMovieDbApi.getTvShowDetails(seriesId = seriesId)
-        insertFilmInDatabase(tvShowDetails, FilmType.TV)
-        return tvShowDetails
-    }
-
     // LOCAL methods using FilmEntity
     suspend fun getFilmById(id: Int, filmType: FilmType): FilmEntity? {
         return cineTixDao.getFilmById(id, filmType.name.lowercase())
@@ -106,53 +54,55 @@ class FilmRepository @Inject constructor(
         return getPagedFilmsFromDatabase { cineTixDao.getBackInTheDaysFilms(filmType.name.lowercase()) }
     }
 
-//    /*fun getRecommendedFilmsFromDB(movieId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
-//        return getPagedFilmsFromDatabase { cineTixDao.getRecommendedFilms(movieId, filmType.name.lowercase()) }
-//    }*/
-
-    fun getSimilarFilmsFromDB(movieId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
-        return getPagedFilmsFromDatabase { cineTixDao.getSimilarFilms(movieId, filmType.name.lowercase()) }
+    fun getSimilarFilmsFromDB(filmId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
+        return getPagedFilmsFromDatabase { cineTixDao.getSimilarFilms(filmId ,filmType.name.lowercase()) }
     }
 
     // Helpers
-    suspend fun insertFilmInDatabase(filmDto: FilmDto, filmType: FilmType) {
+    private suspend fun insertFilmInDatabase(filmDto: FilmDto, filmType: FilmType) {
         val filmEntity = filmDto.toEntity(filmType)
         cineTixDao.insertFilm(filmEntity)
     }
 
-    suspend fun insertFilmsInDatabase(filmDtos: List<FilmDto>, filmType: FilmType) {
+    private suspend fun insertFilmsInDatabase(filmDtos: List<FilmDto>, filmType: FilmType) {
         val filmEntities = filmDtos.map { it.toEntity(filmType) }
         cineTixDao.insertFilms(filmEntities)
     }
 
-    private fun getPagedFilmsWithDatabaseInsertion(
-        filmType: FilmType,
-        pagingSourceFactory: () -> PagingSource<Int, FilmDto>
-    ): Flow<PagingData<FilmEntity>> {
-        return Pager(
-            config = PagingConfig(enablePlaceholders = false, pageSize = 20),
-            pagingSourceFactory = pagingSourceFactory
-        ).flow.map { pagingData ->
-            pagingData.map { filmDto ->
-                // Insert film in the database and convert to FilmEntity
-                CoroutineScope(Dispatchers.IO).launch {
-                    insertFilmInDatabase(filmDto, filmType)
-                }
-                filmDto.toEntity(filmType)
-            }
+    fun getRecommendedFilms(movieId: Int, filmType: FilmType): Flow<PagingData<FilmEntity>> {
+        return getPagedFilmsWithDatabaseInsertion(filmType) {
+            RecommendedFilmSource(theMovieDbApi, filmId = movieId, filmType)
         }
     }
 
-    private fun getPagedFilmsFromDatabase(
-        pagingSourceFactory: () -> PagingSource<Int, FilmEntity>
-    ): Flow<PagingData<FilmEntity>> {
-        return Pager(
-            config = PagingConfig(enablePlaceholders = false, pageSize = 20),
-            pagingSourceFactory = pagingSourceFactory
-        ).flow
+    suspend fun getSimilarMovieFromApi(filmId: Int, filmType: FilmType){
+        try{
+            val movies = theMovieDbApi.getSimilarMovies(
+                filmId,
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+            insertFilmsInDatabase(movies.results, filmType)
+        }catch (e: Exception){
+            Log.e("Error", "Error fetching similar movies")
+        }
     }
 
-    //NewIDEA
+    suspend fun getSimilarSeriesFromApi(filmId: Int, filmType: FilmType){
+        try{
+            val series = theMovieDbApi.getSimilarTvShows(
+                filmId,
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            insertFilmsInDatabase(series.results, filmType)
+        }catch (e: Exception){
+            Log.e("Error", "Error fetching similar series")
+        }
+    }
+
     suspend fun getTrendingMovieFromApi(filmType: FilmType){
         try{
             val movies = theMovieDbApi.getTrendingMovies(
@@ -175,7 +125,6 @@ class FilmRepository @Inject constructor(
             insertFilmsInDatabase(series.results, filmType)
         }catch (e: Exception){
             Log.e("Error", "Error fetching trending series")
-
         }
     }
 
@@ -298,6 +247,32 @@ class FilmRepository @Inject constructor(
         }catch (e: Exception){
             Log.e("Error", "Error fetching back in the days series")
         }
+    }
+
+    private fun getPagedFilmsWithDatabaseInsertion(
+        filmType: FilmType,
+        pagingSourceFactory: () -> PagingSource<Int, FilmDto>
+    ): Flow<PagingData<FilmEntity>> {
+        return Pager(
+            config = PagingConfig(enablePlaceholders = false, pageSize = 20),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow.map { pagingData ->
+            pagingData.map { filmDto ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    insertFilmInDatabase(filmDto, filmType)
+                }
+                filmDto.toEntity(filmType)
+            }
+        }
+    }
+
+    private fun getPagedFilmsFromDatabase(
+        pagingSourceFactory: () -> PagingSource<Int, FilmEntity>
+    ): Flow<PagingData<FilmEntity>> {
+        return Pager(
+            config = PagingConfig(enablePlaceholders = false, pageSize = 20),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow
     }
 }
 

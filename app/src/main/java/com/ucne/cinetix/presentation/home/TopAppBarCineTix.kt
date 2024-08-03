@@ -115,8 +115,6 @@ private fun FilmTypeSelection(
                         ) {
                             if (uiState.selectedFilmType != filmTypes[index]) {
                                 homeViewModel.onFilmTypeChanged(filmTypes[index])
-                                homeViewModel.getFilmGenre()
-                                homeViewModel.refreshAll(null)
                             }
                         }
                 )

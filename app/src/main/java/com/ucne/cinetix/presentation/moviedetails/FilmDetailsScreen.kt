@@ -57,7 +57,6 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
-import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.presentation.components.ExpandableText
 import com.ucne.cinetix.presentation.components.MovieGenreLabel
@@ -74,7 +73,7 @@ import java.util.Date
 
 @Composable
 fun FilmDetailsScreen(
-    detailsViewModel: FilmDetailsViewModel = hiltViewModel(),
+    viewModel: FilmDetailsViewModel = hiltViewModel(),
     filmId: Int,
     selectedFilm: Int,
     goToHomeScreen: () -> Unit,
@@ -82,9 +81,12 @@ fun FilmDetailsScreen(
     refreshPage: (Int, Int) -> Unit
 ) {
     val backgroundColors = rememberGradientColors()
-    val detailsUiState by detailsViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var film by remember { mutableStateOf<FilmEntity?>(null) }
     val date = SimpleDateFormat.getDateTimeInstance().format(Date())
+    val addedToList = uiState.addedToWatchList
+    val similarFilms = uiState.similarFilms.collectAsLazyPagingItems()
+
     val watchListMovie = film?.let {
         WatchListEntity(
             watchListId = it.id,
@@ -96,29 +98,13 @@ fun FilmDetailsScreen(
             addedOn = date
         )
     }
-    val addedToList = detailsUiState.addedToWatchList
-    val similarFilms = detailsUiState.similarFilms.collectAsLazyPagingItems()
 
-    LaunchedEffect(key1 = filmId) {
-        if(selectedFilm == 1){
-            detailsViewModel.getFilmById(filmId = filmId, filmType = FilmType.MOVIE) }
-        else {
-            detailsViewModel.getFilmById(filmId = filmId, filmType = FilmType.TV)
-        }
-        detailsViewModel.getFilmGenre(
-            filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
-        )
-    }
-
-    LaunchedEffect(detailsUiState) {
-        film = detailsUiState.film
-        film?.let {
-            detailsViewModel.getSimilarFilms(
-                filmId = it.id,
-                filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
-            )
-            detailsViewModel.exists(it.id)
-        }
+    LaunchedEffect(key1 = filmId, key2 = selectedFilm, key3 = uiState.film) {
+        film = uiState.film
+        film?.let { viewModel.exists(it.id)}
+        val filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
+        viewModel.getFilmById(filmId = filmId, filmType = filmType)
+        viewModel.getSimilars(filmType, filmId)
     }
 
     Column(
@@ -281,7 +267,7 @@ fun FilmDetailsScreen(
                         val context = LocalContext.current
                         IconButton(onClick = {
                             if (addedToList != 0) {
-                                detailsViewModel.removeFromWatchList(watchListMovie!!.watchListId)
+                                viewModel.removeFromWatchList(watchListMovie!!.watchListId)
 
                                 Toast.makeText(
                                     context, "Removed from watchlist", LENGTH_SHORT
@@ -289,7 +275,7 @@ fun FilmDetailsScreen(
 
                             } else {
                                 if (watchListMovie != null) {
-                                    detailsViewModel.addToWatchList(watchListMovie)
+                                    viewModel.addToWatchList(watchListMovie)
                                 }
                                 Toast.makeText(
                                     context, "Added to watchlist", LENGTH_SHORT
@@ -359,7 +345,7 @@ fun FilmDetailsScreen(
                     .padding(top = (96).dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                     .fillMaxWidth()
             ) {
-                val genreList = detailsUiState.filmGenres.filter { genres ->
+                val genreList = uiState.filmGenres.filter { genres ->
                     genres.id in (film!!.genreIds ?: emptyList()) }
                 genreList.forEach { genre ->
                     item {

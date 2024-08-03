@@ -1,6 +1,5 @@
 package com.ucne.cinetix.presentation.moviedetails
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -8,14 +7,10 @@ import androidx.paging.cachedIn
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
-import com.ucne.cinetix.data.remote.dto.FilmDto
-import com.ucne.cinetix.data.remote.dto.GenreDto
-import com.ucne.cinetix.data.remote.dto.toEntity
 import com.ucne.cinetix.data.repository.FilmRepository
 import com.ucne.cinetix.data.repository.GenreRepository
 import com.ucne.cinetix.data.repository.WatchListRepository
 import com.ucne.cinetix.util.FilmType
-import com.ucne.cinetix.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,14 +32,31 @@ class FilmDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FilmDetailsUIState())
     val uiState = _uiState.asStateFlow()
 
-    fun getSimilarFilms(filmId: Int, filmType: FilmType) {
+    private fun getFilmsData() {
+        val filmType = uiState.value.selectedFilmType
+        val filmId = uiState.value.film?.id ?: 0
+        getSimilarFilmsRemote(filmId, filmType)
+    }
+
+    private fun getSimilarFilmsRemote(filmId: Int, filmType: FilmType) {
         viewModelScope.launch {
-            filmRepository.getSimilarFilms(filmId, filmType).also {
+            if (filmType == FilmType.MOVIE){
+                filmRepository.getSimilarMovieFromApi(filmId, filmType)
+            }
+            else {
+                filmRepository.getSimilarSeriesFromApi(filmId, filmType)
+            }
+        }
+        getSimilarFilmsFromDb(filmId, filmType)
+    }
+
+    private fun getSimilarFilmsFromDb(filmId: Int, filmType: FilmType) {
+        viewModelScope.launch {
+            filmRepository.getSimilarFilmsFromDB(filmId, filmType).also {
                 uiState.value.similarFilms = it
             }.cachedIn(viewModelScope)
         }
     }
-
 
     fun getFilmById(filmId: Int, filmType: FilmType) {
         viewModelScope.launch {
@@ -53,7 +65,7 @@ class FilmDetailsViewModel @Inject constructor(
         }
     }
 
-    fun getFilmGenre(filmType: FilmType = uiState.value.selectedFilmType) {
+    private fun getFilmGenre(filmType: FilmType = uiState.value.selectedFilmType) {
         viewModelScope.launch {
             val defaultGenre = GenreEntity(null, "All")
             genreRepository.getGenresFromDB(filmType).onEach { genresFromDB ->
@@ -89,15 +101,25 @@ class FilmDetailsViewModel @Inject constructor(
             exists(mediaId)
         }
     }
+
+    suspend fun getSimilars(filmType: FilmType, filmId: Int) {
+        _uiState.update {
+            val film = filmRepository.getFilmById(filmId, filmType)
+            it.copy(
+                selectedFilmType = filmType,
+                film = film
+            )
+        }
+        getFilmGenre(filmType)
+        getFilmsData()
+    }
 }
 
 data class FilmDetailsUIState(
     var similarFilms: Flow<PagingData<FilmEntity>> = emptyFlow(),
     val film: FilmEntity? = null,
-    val movieDetails: FilmDto? = null,
-    val tvShowDetails: FilmDto? = null,
     val filmGenres: List<GenreEntity> = listOf(GenreEntity(null, "All")),
-    var selectedFilmType: FilmType = FilmType.MOVIE,
+    val selectedFilmType: FilmType = FilmType.MOVIE,
     val addedToWatchList: Int = 0,
     val isLoading: Boolean = false,
     val errorMessage: String? = null

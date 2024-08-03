@@ -17,7 +17,7 @@ class GenreRepository @Inject constructor(
     private val theMovieDbApi: TheMovieDbApi,
     private val cineTixDao: CineTixDao
 ) {
-    suspend fun getMoviesGenre(filmType: FilmType): Resource<GenreResponse> {
+    suspend fun getMoviesGenre(): Resource<GenreResponse> {
         val movieGenresResponse = try {
             theMovieDbApi.getMovieGenres()
         } catch (e: Exception) {
@@ -28,15 +28,13 @@ class GenreRepository @Inject constructor(
         } catch (e: Exception) {
             return Resource.Error("Error fetching TV show genres: ${e.message}")
         }
-
-        // Combine the genres from both responses
+        // Combine the genres
         val allGenres = movieGenresResponse.genres + tvGenresResponse.genres
 
         val genreEntities = allGenres.map { it.toEntity() }
         cineTixDao.insertGenres(genreEntities)
 
         val combinedResponse = GenreResponse(genres = allGenres)
-
         return Resource.Success(combinedResponse)
     }
 
@@ -68,5 +66,3 @@ class GenreRepository @Inject constructor(
         cineTixDao.insertGenres(genres)
     }
 }
-
-/*TODO:VER COMO DISTINGUIR GENEROS POR FILMTYPE*/

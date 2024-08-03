@@ -44,7 +44,7 @@ class WatchListViewModel @Inject constructor(
         }
     }
 
-    fun exists(mediaId: Int) {
+    private fun exists(mediaId: Int) {
         viewModelScope.launch {
             val exists = watchListRepository.exists(mediaId)
             _uiState.update { it.copy(addedToWatchList = exists) }

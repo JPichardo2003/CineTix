@@ -6,8 +6,6 @@ import androidx.room.Query
 import androidx.room.Upsert
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
-import com.ucne.cinetix.data.local.entities.SearchEntity
-import com.ucne.cinetix.util.FilmType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -91,10 +89,12 @@ interface CineTixDao {
     """)
     fun getBackInTheDaysFilms(filmType: String): PagingSource<Int, FilmEntity>
 
+    //Obtener las films similares
     @Query("""
     SELECT * FROM Films 
-    WHERE mediaType = :filmType 
+    WHERE mediaType = :filmType
     AND id != :filmId
+    ORDER BY popularity DESC
     """)
     fun getSimilarFilms(filmId: Int, filmType: String): PagingSource<Int, FilmEntity>
 

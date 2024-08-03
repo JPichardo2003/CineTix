@@ -40,17 +40,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun refreshAll(
-        genreId: Int? = uiState.value.selectedGenre.id,
-        filmType: FilmType = uiState.value.selectedFilmType
-    ) {
+    fun refreshAll()
+    {
+        val filmType = uiState.value.selectedFilmType/*TODO: VERIFICAR*/
+        val genreId = uiState.value.selectedGenre.id
+
         if (uiState.value.filmGenres.size == 1) {
             getFilmGenre()
         }
         if (genreId == null) {
             _uiState.update { it.copy(selectedGenre = GenreEntity(null, "All")) }
         }
-
         getDataFromAPi(filmType)
         getTrendingFilms(genreId, filmType)
         getPopularFilms(genreId, filmType)
@@ -83,15 +83,15 @@ class HomeViewModel @Inject constructor(
 
     fun filterBySetSelectedGenre(genre: GenreEntity) {
         _uiState.update { it.copy(selectedGenre = genre) }
-        refreshAll(genre.id)
+        refreshAll()
     }
 
-    fun getFilmGenre(filmType: FilmType = uiState.value.selectedFilmType) {
+    private fun getFilmGenre(filmType: FilmType = uiState.value.selectedFilmType) {
         viewModelScope.launch {
             val defaultGenre = GenreEntity(null, "All")
             genreRepository.getGenresFromDB(filmType).onEach { genresFromDB ->
                 if (genresFromDB.isEmpty()) {
-                    val apiResponse = genreRepository.getMoviesGenre(filmType)
+                    val apiResponse = genreRepository.getMoviesGenre()
                     if (apiResponse is Resource.Success) {
                         genreRepository.insertGenres(apiResponse.data?.genres?.map { it.toEntity() } ?: emptyList())
                     } else {
@@ -225,14 +225,18 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFilmTypeChanged(filmType: FilmType) {
-        _uiState.update { it.copy(selectedFilmType = filmType) }
+        _uiState.update {
+            it.copy(selectedFilmType = filmType)
+        }
+        getFilmGenre(filmType)
+        refreshAll()
     }
 }
 
 
 data class HomeUIState(
     val filmGenres: List<GenreEntity> = listOf(GenreEntity(null, "All")),
-    var selectedGenre: GenreEntity = GenreEntity(null, "All"),
+    val selectedGenre: GenreEntity = GenreEntity(null, "All"),
     var selectedFilmType: FilmType = FilmType.MOVIE,
     val filmFromApi: Flow<PagingData<FilmEntity>> = emptyFlow(),
     val trendingMoviesState: Flow<PagingData<FilmEntity>> = emptyFlow(),

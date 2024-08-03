@@ -19,15 +19,6 @@ class SearchRepository @Inject constructor(
     private val theMovieDbApi: TheMovieDbApi,
     private val cineTixDao: CineTixDao
 ) {
-    fun multiSearch(searchParams: String): Flow<PagingData<FilmDto>> {
-        return Pager(
-            config = PagingConfig(enablePlaceholders = false, pageSize = 20),
-            pagingSourceFactory = {
-                SearchFilmSource(theMovieDbApi = theMovieDbApi, searchParams = searchParams)
-            }
-        ).flow
-    }
-
     fun searchFromDB(searchParams: String): Flow<PagingData<FilmEntity>> {
         return Pager(
             config = PagingConfig(enablePlaceholders = false, pageSize = 20),
@@ -52,7 +43,7 @@ class SearchRepository @Inject constructor(
         }
     }
 
-    suspend fun insertFilmsInDatabase(filmDtos: List<FilmDto>, filmType: FilmType) {
+    private suspend fun insertFilmsInDatabase(filmDtos: List<FilmDto>, filmType: FilmType) {
         val filmEntities = filmDtos.map { it.toEntity(filmType) }
         cineTixDao.insertFilms(filmEntities)
     }

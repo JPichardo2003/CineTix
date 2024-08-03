@@ -36,7 +36,6 @@ import com.ucne.cinetix.R
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
 
-
 @Composable
 fun SearchBar(
     viewModel: SearchViewModel = hiltViewModel(),

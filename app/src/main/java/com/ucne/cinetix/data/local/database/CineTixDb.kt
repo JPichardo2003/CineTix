@@ -7,7 +7,6 @@ import com.ucne.cinetix.data.local.dao.CineTixDao
 import com.ucne.cinetix.data.local.dao.WatchListDao
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
-import com.ucne.cinetix.data.local.entities.SearchEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
 import com.ucne.cinetix.data.local.typeconverters.Converters
 
@@ -15,7 +14,6 @@ import com.ucne.cinetix.data.local.typeconverters.Converters
     entities = [
         FilmEntity::class,
         GenreEntity::class,
-        SearchEntity::class,
         WatchListEntity::class
     ],
     version = 1,
