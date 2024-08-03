@@ -60,6 +60,7 @@ fun WatchListScreen(
     watchListViewModel: WatchListViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit,
     goToProfileScreen: () -> Unit,
+    goToFilmDetails: (Int, Int) -> Unit
 ) {
     val watchListState by watchListViewModel.uiState.collectAsStateWithLifecycle()
     var currentList by remember { mutableStateOf<List<WatchListEntity>>(emptyList()) }
@@ -164,8 +165,15 @@ fun WatchListScreen(
                         posterImage = "${Constants.BASE_POSTER_IMAGE_URL}/${film.imagePath}",
                         genres = emptyList(),
                         rating = film.rating ?: 0.0,
-                        releaseYear = film.releaseDate
-                    ) { }
+                        releaseYear = film.releaseDate,
+                        onClick = {
+                            if (film.mediaType == "movie") {
+                                goToFilmDetails(film.watchListId, 1)
+                            } else {
+                                goToFilmDetails(film.watchListId, 2)
+                            }
+                        }
+                    )
                 }
             }
         }

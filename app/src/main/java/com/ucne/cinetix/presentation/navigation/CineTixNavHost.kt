@@ -46,6 +46,9 @@ fun CineTixNavHost(
             SearchScreen(
                 goToHomeScreen = {
                     navHostController.navigate(Screen.Home)
+                },
+                goToFilmDetails = { id, filmType ->
+                    navHostController.navigate(Screen.MovieDetails(id, filmType))
                 }
             )
         }
@@ -68,6 +71,9 @@ fun CineTixNavHost(
                 },
                 goToProfileScreen = {
                     navHostController.navigate(Screen.Profile)
+                },
+                goToFilmDetails = { id, filmType ->
+                    navHostController.navigate(Screen.MovieDetails(id, filmType))
                 }
             )
         }

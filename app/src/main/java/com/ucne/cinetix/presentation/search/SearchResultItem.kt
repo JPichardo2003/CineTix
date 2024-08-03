@@ -39,6 +39,7 @@ import com.gowtham.ratingbar.RatingBarConfig
 import com.gowtham.ratingbar.RatingBarStyle
 import com.gowtham.ratingbar.StepSize
 import com.ucne.cinetix.R
+import com.ucne.cinetix.data.local.entities.GenreEntity
 import com.ucne.cinetix.data.remote.dto.GenreDto
 import com.ucne.cinetix.presentation.components.MovieGenreLabel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
@@ -51,7 +52,7 @@ fun SearchResultItem(
     title: String?,
     mediaType: String?,
     posterImage: String?,
-    genres: List<GenreDto>?,
+    genres: List<GenreEntity>?,
     rating: Double,
     releaseYear: String?,
     onClick: () -> Unit?

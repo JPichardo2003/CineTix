@@ -32,7 +32,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.ucne.cinetix.R
 import com.ucne.cinetix.presentation.components.BackButton
-import com.ucne.cinetix.presentation.home.HomeViewModel
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.rememberGradientColors
 import com.ucne.cinetix.util.Constants.BASE_POSTER_IMAGE_URL
@@ -40,7 +39,8 @@ import com.ucne.cinetix.util.Constants.BASE_POSTER_IMAGE_URL
 @Composable
 fun SearchScreen(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    goToHomeScreen: () -> Unit
+    goToHomeScreen: () -> Unit,
+    goToFilmDetails: (Int, Int) -> Unit
 ) {
     val searchUiState by searchViewModel.uiState.collectAsStateWithLifecycle()
     val searchResult = searchUiState.multiSearch.collectAsLazyPagingItems()
@@ -106,12 +106,17 @@ fun SearchScreen(
                                 genres = searchUiState.filmGenres.filter { genre ->
                                     films.genres?.any { it.id == genre.id } ?: false
                                 },
-                                rating = (films.voteAverage ?: 0).toDouble(),
+                                rating = (films.voteAverage),
                                 releaseYear = films.releaseDate ?: films.releaseDateSeries,
-                                onClick = {}
+                                onClick = {
+                                    if (films.mediaType == "movie") {
+                                        goToFilmDetails(films.id, 1)
+                                    } else {
+                                        goToFilmDetails(films.id, 2)
+                                    }
+                                }
                             )
                         }
-
                     }
                     if (searchResult.itemCount == 0) {
                         item {

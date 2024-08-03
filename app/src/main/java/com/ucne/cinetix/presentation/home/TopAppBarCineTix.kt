@@ -94,7 +94,7 @@ private fun FilmTypeSelection(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val filmTypes = listOf(FilmType.MOVIE, FilmType.SERIES)
+        val filmTypes = listOf(FilmType.MOVIE, FilmType.TV)
         val selectedFilmType = uiState.selectedFilmType
 
         Row(
@@ -115,8 +115,6 @@ private fun FilmTypeSelection(
                         ) {
                             if (uiState.selectedFilmType != filmTypes[index]) {
                                 homeViewModel.onFilmTypeChanged(filmTypes[index])
-                                homeViewModel.getFilmGenre()
-                                homeViewModel.refreshAll(null)
                             }
                         }
                 )

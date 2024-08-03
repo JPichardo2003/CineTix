@@ -62,6 +62,7 @@ import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
+import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.remote.dto.FilmDto
 import com.ucne.cinetix.presentation.components.LoopReverseLottieLoader
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
@@ -257,7 +258,7 @@ fun MovieItem(
     title: String,
     modifier: Modifier,
     landscape: Boolean,
-    goToFilmDetails: () -> Unit //para navegar
+    goToFilmDetails: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -276,7 +277,7 @@ fun MovieItem(
             shimmerParams = ShimmerParams(
                 baseColor = AppPrimaryColor,
                 highlightColor = ButtonColor,
-                durationMillis = 300,
+                durationMillis = 100,
                 dropOff = 0.65F,
                 tilt = 20F
             ),
@@ -299,7 +300,7 @@ fun MovieItem(
             },
             previewPlaceholder = R.drawable.hashiras,
             contentScale = Crop,
-            circularReveal = CircularReveal(duration = 1000),
+            circularReveal = CircularReveal(duration = 500),
             modifier = modifier.clip(RoundedCornerShape(8.dp)),
             contentDescription = "Movie item"
         )
@@ -323,7 +324,7 @@ fun MovieItem(
 @Composable
 private fun ScrollableMovieItems(
     landscape: Boolean = false,
-    pagingItems: LazyPagingItems<FilmDto>,
+    pagingItems: LazyPagingItems<FilmEntity>,
     onErrorClick: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit,
     selectedFilmType: FilmType
