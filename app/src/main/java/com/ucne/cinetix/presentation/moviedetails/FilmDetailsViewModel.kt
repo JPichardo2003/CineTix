@@ -1,5 +1,7 @@
 package com.ucne.cinetix.presentation.moviedetails
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -7,30 +9,79 @@ import androidx.paging.cachedIn
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
+import com.ucne.cinetix.data.repository.AuthRepository
 import com.ucne.cinetix.data.repository.FilmRepository
 import com.ucne.cinetix.data.repository.GenreRepository
+import com.ucne.cinetix.data.repository.UsuarioRepository
 import com.ucne.cinetix.data.repository.WatchListRepository
+import com.ucne.cinetix.presentation.auth.AuthState
 import com.ucne.cinetix.util.FilmType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class FilmDetailsViewModel @Inject constructor(
     private val filmRepository: FilmRepository,
     private val genreRepository: GenreRepository,
-    private val watchListRepository: WatchListRepository
+    private val watchListRepository: WatchListRepository,
+    private val authRepository: AuthRepository,
+    private val userRepository: UsuarioRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FilmDetailsUIState())
     val uiState = _uiState.asStateFlow()
+    private val _authState = MutableLiveData<AuthState>()
+    val authState: LiveData<AuthState> = _authState
+
+    init {
+        checkAuthStatus()
+    }
+
+    val usuarios = userRepository.getUsers()
+        .stateIn(
+            scope =viewModelScope,
+            started =  SharingStarted.WhileSubscribed(),
+            initialValue = emptyList()
+        )
+
+    private fun checkAuthStatus(){
+        viewModelScope.launch {
+            authRepository.checkAuthStatus().collect{
+                _authState.value = it
+            }
+            if(_authState.value is AuthState.Authenticated){
+                _uiState.update {
+                    it.copy(
+                        email = (_authState.value as AuthState.Authenticated).email,
+                    )
+                }
+            }
+        }
+
+    }
+
+    private fun getUserIdByEmail() {
+        viewModelScope.launch {
+            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
+            _uiState.update {
+                it.copy(
+                    userId = usuario?.userId
+                )
+            }
+        }
+    }
 
     private fun getFilmsData() {
         val filmType = uiState.value.selectedFilmType
@@ -60,8 +111,12 @@ class FilmDetailsViewModel @Inject constructor(
 
     fun getFilmById(filmId: Int, filmType: FilmType) {
         viewModelScope.launch {
+            getUserIdByEmail()
+            exists(filmId, uiState.value.userId ?: 0)
             val film = filmRepository.getFilmById(filmId, filmType)
-            _uiState.update { it.copy(film = film) }
+            _uiState.update {
+                it.copy(film = film)
+            }
         }
     }
 
@@ -79,26 +134,48 @@ class FilmDetailsViewModel @Inject constructor(
     }
 
     // Watchlist
-    fun addToWatchList(movie: WatchListEntity) {
+    fun addToWatchList(filmId: Int, userId: Int) {
+        val date = SimpleDateFormat.getDateTimeInstance().format(Date())
         viewModelScope.launch {
-            watchListRepository.addToWatchList(movie)
-        }.invokeOnCompletion {
-            exists(movie.watchListId)
+            watchListRepository.addToWatchList(
+                WatchListEntity(
+                    userId = userId,
+                    filmId = filmId,
+                    addedOn = date
+                )
+            )
         }
     }
 
-    fun exists(mediaId: Int) {
+    fun onWatchListChanged(filmId: Int?, userId: Int?) {
         viewModelScope.launch {
-            val exists = watchListRepository.exists(mediaId)
+            var addedToWatchList = watchListRepository.exists(filmId?: 0, userId?: 0)
+            if(!addedToWatchList){
+                addToWatchList(filmId?: 0, userId?: 0)
+                addedToWatchList = true
+            }
+            else{
+                removeFromWatchList(filmId?: 0, userId?: 0)
+                addedToWatchList = false
+            }
+            _uiState.update {
+                it.copy(
+                    addedToWatchList = addedToWatchList
+                )
+            }
+        }
+    }
+
+    private fun exists(filmId: Int, userId: Int) {
+        viewModelScope.launch {
+            val exists = watchListRepository.exists(filmId, userId)
             _uiState.update { it.copy(addedToWatchList = exists) }
         }
     }
 
-    fun removeFromWatchList(mediaId: Int) {
+    private fun removeFromWatchList(filmId: Int, userId: Int) {
         viewModelScope.launch {
-            watchListRepository.removeFromWatchList(mediaId)
-        }.invokeOnCompletion {
-            exists(mediaId)
+            watchListRepository.removeFromWatchList(filmId, userId)
         }
     }
 
@@ -118,9 +195,11 @@ class FilmDetailsViewModel @Inject constructor(
 data class FilmDetailsUIState(
     var similarFilms: Flow<PagingData<FilmEntity>> = emptyFlow(),
     val film: FilmEntity? = null,
+    val userId: Int? = null,
     val filmGenres: List<GenreEntity> = listOf(GenreEntity(null, "All")),
     val selectedFilmType: FilmType = FilmType.MOVIE,
-    val addedToWatchList: Int = 0,
+    val addedToWatchList: Boolean = false,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val email: String? = null
 )

@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.ucne.cinetix.presentation.auth.LoginScreen
+import com.ucne.cinetix.presentation.auth.SignUpScreen
 import com.ucne.cinetix.presentation.home.HomeScreen
 import com.ucne.cinetix.presentation.moviedetails.FilmDetailsScreen
 import com.ucne.cinetix.presentation.profile.ProfileScreen
@@ -17,7 +19,7 @@ fun CineTixNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Home,
+        startDestination = Screen.WatchList,
     ) {
         composable<Screen.Home> {
             HomeScreen(
@@ -39,6 +41,9 @@ fun CineTixNavHost(
                 },
                 goToWatchListScreen = {
                     navHostController.navigate(Screen.WatchList)
+                },
+                goToLoginScreen = {
+                    navHostController.navigate(Screen.Login)
                 }
             )
         }
@@ -74,6 +79,26 @@ fun CineTixNavHost(
                 },
                 goToFilmDetails = { id, filmType ->
                     navHostController.navigate(Screen.MovieDetails(id, filmType))
+                }
+            )
+        }
+        composable<Screen.Login> {
+            LoginScreen(
+                goToSignUpScreen = {
+                    navHostController.navigate(Screen.Signup)
+                },
+                goToHomeScreen = {
+                    navHostController.navigate(Screen.Home)
+                }
+            )
+        }
+        composable<Screen.Signup> {
+            SignUpScreen (
+                goToLoginScreen = {
+                    navHostController.navigate(Screen.Login)
+                },
+                goToHomeScreen = {
+                    navHostController.navigate(Screen.Home)
                 }
             )
         }

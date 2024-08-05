@@ -2,6 +2,7 @@ package com.ucne.cinetix.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.ucne.cinetix.data.local.database.CineTixDb
@@ -52,7 +53,16 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideFireBaseAuth() = FirebaseAuth.getInstance()
+
+    @Provides
+    @Singleton
     fun provideWatchListDao(database: CineTixDb) = database.watchListDao()
+
+    @Provides
+    @Singleton
+    fun provideUsuarioDao(database: CineTixDb) = database.usuarioDao()
+
     @Provides
     @Singleton
     fun provideCineTixDao(database: CineTixDb) = database.cineTixDao()

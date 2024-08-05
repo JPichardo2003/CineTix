@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Shop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +30,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,23 +42,54 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.skydoves.landscapist.CircularReveal
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
+import com.ucne.cinetix.presentation.auth.AuthState
+import com.ucne.cinetix.presentation.auth.AuthViewModel
+import com.ucne.cinetix.presentation.auth.UsuarioUIState
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.AppPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
-import com.ucne.cinetix.ui.theme.CineTixTheme
 import com.ucne.cinetix.ui.theme.rememberGradientColors
 
 @Composable
 fun ProfileScreen(
+    viewModel: AuthViewModel = hiltViewModel(),
+    goToHomeScreen: () -> Unit,
+    goToWatchListScreen: () -> Unit,
+    goToLoginScreen: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    viewModel.usuarios.collectAsStateWithLifecycle()
+    val authState = viewModel.authState.observeAsState()
+    LaunchedEffect(authState.value) {
+        when(authState.value){
+            is AuthState.Unauthenticated -> goToLoginScreen()
+            else -> Unit
+        }
+    }
+    ProfileBody(
+        uiState = uiState,
+        signOut = viewModel::signOut,
+        goToHomeScreen = goToHomeScreen,
+        goToWatchListScreen = goToWatchListScreen,
+        getUserNameByMail = viewModel::getUserNameByMail
+    )
+}
+
+@Composable
+fun ProfileBody(
+    uiState: UsuarioUIState,
+    signOut: () -> Unit,
+    getUserNameByMail: (String) -> String,
     goToHomeScreen: () -> Unit,
     goToWatchListScreen: () -> Unit
 ) {
@@ -105,9 +140,9 @@ fun ProfileScreen(
                     },
                 containerColor = ButtonColor,
                 contentColor = AppOnPrimaryColor,
-                onClick = { /* Acción de edición de perfil */ }
+                onClick = signOut
             ) {
-                Icon(imageVector = Icons.Rounded.Edit, contentDescription = "edit profile")
+                Icon(imageVector = Icons.Rounded.Logout, contentDescription = "LogOut")
             }
 
             // Encabezado de perfil
@@ -200,7 +235,7 @@ fun ProfileScreen(
 
             // Nombre de usuario
             Text(
-                text = "JPichardo2003",
+                text = getUserNameByMail(uiState.email ?: ""),
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 color = AppOnPrimaryColor,
@@ -286,24 +321,21 @@ fun ProfileScreen(
 
                     ProfileTextField(
                         label = "Email",
-                        value = "example@email.com",
-                        placeholder = "Enter your email",
+                        value = uiState.email ?: "no email",
                         onValueChange = {}
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
                     ProfileTextField(
                         label = "Password",
-                        value = "********",
-                        placeholder = "Enter your password",
+                        value = "*******",
                         onValueChange = {}
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
                     ProfileTextField(
                         label = "Username",
-                        value = "JPichardo2003",
-                        placeholder = "Enter your username",
+                        value = getUserNameByMail(uiState.email ?: ""),
                         onValueChange = {}
                     )
                 }
@@ -317,7 +349,6 @@ fun ProfileScreen(
 fun ProfileTextField(
     label: String,
     value: String,
-    placeholder: String,
     onValueChange: (String) -> Unit
 ) {
     Row(
@@ -339,7 +370,6 @@ fun ProfileTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.weight(2f),
-            placeholder = { Text(placeholder) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -348,17 +378,6 @@ fun ProfileTextField(
                 focusedIndicatorColor = Color.White,
                 unfocusedIndicatorColor = Color.White
             )
-        )
-    }
-}
-
-@Preview
-@Composable
-fun ProfileScreenPreview() {
-    CineTixTheme {
-        ProfileScreen(
-            goToHomeScreen = {},
-            goToWatchListScreen = {}
         )
     }
 }

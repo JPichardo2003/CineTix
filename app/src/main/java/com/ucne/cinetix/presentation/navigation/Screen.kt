@@ -7,13 +7,19 @@ sealed class Screen {
     data object Home : Screen()
 
     @Serializable
-    data object Profile : Screen()
-
-    @Serializable
     data object Search : Screen()
 
     @Serializable
     data object WatchList : Screen()
+
+    @Serializable
+    data object Profile : Screen()
+
+    @Serializable
+    data object Login : Screen()
+
+    @Serializable
+    data object Signup : Screen()
 
     @Serializable
     data class MovieDetails(val filmId: Int, val selectedFilmType: Int) : Screen()
