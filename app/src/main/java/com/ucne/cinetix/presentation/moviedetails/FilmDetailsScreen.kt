@@ -79,33 +79,42 @@ fun FilmDetailsScreen(
     goToHomeScreen: () -> Unit,
     goToWatchListScreen: () -> Unit,
     refreshPage: (Int, Int) -> Unit
-) {
-    val backgroundColors = rememberGradientColors()
+){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    viewModel.usuarios.collectAsStateWithLifecycle()
     var film by remember { mutableStateOf<FilmEntity?>(null) }
-    val date = SimpleDateFormat.getDateTimeInstance().format(Date())
-    val addedToList = uiState.addedToWatchList
-    val similarFilms = uiState.similarFilms.collectAsLazyPagingItems()
-
-    val watchListMovie = film?.let {
-        WatchListEntity(
-            watchListId = it.id,
-            mediaType = if(selectedFilm == 1) "movie" else "tv",
-            imagePath = film!!.posterPath,
-            title = film?.title ?: film?.titleSeries ?: "TBA",
-            releaseDate = film?.releaseDate ?: film?.releaseDateSeries ?: "TBA",
-            rating = film?.voteAverage ?: 0.0,
-            addedOn = date
-        )
-    }
 
     LaunchedEffect(key1 = filmId, key2 = selectedFilm, key3 = uiState.film) {
         film = uiState.film
-        film?.let { viewModel.exists(it.id)}
         val filmType = if (selectedFilm == 1) FilmType.MOVIE else FilmType.TV
         viewModel.getFilmById(filmId = filmId, filmType = filmType)
         viewModel.getSimilars(filmType, filmId)
     }
+
+    FilmDetailsBody(
+        uiState = uiState,
+        film = film,
+        selectedFilm = selectedFilm,
+        goToHomeScreen = goToHomeScreen,
+        goToWatchListScreen = goToWatchListScreen,
+        refreshPage = refreshPage,
+        onWatchListChanged = viewModel::onWatchListChanged,
+    )
+
+}
+
+@Composable
+fun FilmDetailsBody(
+    uiState: FilmDetailsUIState,
+    film: FilmEntity?,
+    selectedFilm: Int,
+    goToHomeScreen: () -> Unit,
+    goToWatchListScreen: () -> Unit,
+    refreshPage: (Int, Int) -> Unit,
+    onWatchListChanged: (Int?, Int?) -> Unit,
+) {
+    val backgroundColors = rememberGradientColors()
+    val similarFilms = uiState.similarFilms.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier
@@ -131,7 +140,7 @@ fun FilmDetailsScreen(
                 ) = createRefs()
 
                 CoilImage(
-                    imageModel = "$BASE_BACKDROP_IMAGE_URL${film!!.backdropPath}",
+                    imageModel = "$BASE_BACKDROP_IMAGE_URL${film.backdropPath}",
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
@@ -222,7 +231,7 @@ fun FilmDetailsScreen(
                     }
 
                     Text(
-                        text = film?.title ?: film?.titleSeries ?: "TBA",
+                        text = film.title ?: film.titleSeries ?: "TBA",
                         modifier = Modifier
                             .padding(top = 2.dp, start = 4.dp, bottom = 4.dp)
                             .fillMaxWidth(0.5F),
@@ -233,7 +242,7 @@ fun FilmDetailsScreen(
                     )
 
                     Text(
-                        text = film?.releaseDate ?: film?.releaseDateSeries ?: "TBA",
+                        text = film.releaseDate ?: film.releaseDateSeries ?: "TBA",
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
                         fontSize = 15.sp,
                         fontWeight = Light,
@@ -241,7 +250,7 @@ fun FilmDetailsScreen(
                     )
 
                     RatingBar(
-                        value = (film!!.voteAverage / 2).toFloat(),
+                        value = (film.voteAverage / 2).toFloat(),
                         modifier = Modifier.padding(start = 6.dp, bottom = 4.dp, top = 4.dp),
                         config = RatingBarConfig()
                             .style(RatingBarStyle.Normal)
@@ -266,17 +275,13 @@ fun FilmDetailsScreen(
                     ) {
                         val context = LocalContext.current
                         IconButton(onClick = {
-                            if (addedToList != 0) {
-                                viewModel.removeFromWatchList(watchListMovie!!.watchListId)
-
+                            onWatchListChanged(film.id, uiState.userId)
+                            if (uiState.addedToWatchList) {
                                 Toast.makeText(
                                     context, "Removed from watchlist", LENGTH_SHORT
                                 ).show()
 
                             } else {
-                                if (watchListMovie != null) {
-                                    viewModel.addToWatchList(watchListMovie)
-                                }
                                 Toast.makeText(
                                     context, "Added to watchlist", LENGTH_SHORT
                                 ).show()
@@ -284,8 +289,8 @@ fun FilmDetailsScreen(
                         }) {
                             Icon(
                                 painter = painterResource(
-                                    id = if (addedToList != 0) R.drawable.ic_added_to_list
-                                    else R.drawable.ic_add_to_list
+                                    id = if (!uiState.addedToWatchList) R.drawable.ic_add_to_list
+                                    else R.drawable.ic_added_to_list
                                 ),
                                 tint = AppOnPrimaryColor,
                                 contentDescription = "add to watch list icon",
@@ -305,7 +310,7 @@ fun FilmDetailsScreen(
                 }
 
                 CoilImage(
-                    imageModel = "$BASE_POSTER_IMAGE_URL/${film!!.posterPath}",
+                    imageModel = "$BASE_POSTER_IMAGE_URL/${film.posterPath}",
                     modifier = Modifier
                         .padding(16.dp)
                         .clip(RoundedCornerShape(4.dp))
@@ -346,7 +351,7 @@ fun FilmDetailsScreen(
                     .fillMaxWidth()
             ) {
                 val genreList = uiState.filmGenres.filter { genres ->
-                    genres.id in (film!!.genreIds ?: emptyList()) }
+                    genres.id in (film.genreIds ?: emptyList()) }
                 genreList.forEach { genre ->
                     item {
                         MovieGenreLabel(
@@ -359,7 +364,7 @@ fun FilmDetailsScreen(
             }
 
             ExpandableText(
-                text = film!!.overview,
+                text = film.overview,
                 modifier = Modifier
                     .padding(top = 3.dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                     .fillMaxWidth()

@@ -53,21 +53,62 @@ import com.ucne.cinetix.ui.theme.AppOnPrimaryColor
 import com.ucne.cinetix.ui.theme.ButtonColor
 import com.ucne.cinetix.ui.theme.rememberGradientColors
 import com.ucne.cinetix.util.Constants
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 
 @Composable
 fun WatchListScreen(
-    watchListViewModel: WatchListViewModel = hiltViewModel(),
+    viewModel: WatchListViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit,
     goToProfileScreen: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit
 ) {
-    val watchListState by watchListViewModel.uiState.collectAsStateWithLifecycle()
-    var currentList by remember { mutableStateOf<List<WatchListEntity>>(emptyList()) }
-
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val watchList by viewModel.watchList.collectAsStateWithLifecycle()
+    viewModel.usuarios.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        currentList = watchListState.watchList.first()
+        viewModel.getUserIdByEmail()
     }
+
+    // Obtener la lista de observación solo si userId está disponible
+    LaunchedEffect(uiState.userId) {
+        uiState.userId?.let { userId ->
+            viewModel.getFilmsByUser(userId)
+        }
+    }
+
+    LaunchedEffect(watchList) {
+        val filmIds = watchList.map { it.filmId }
+        viewModel.getFilmsById(filmIds)
+    }
+
+    WatchListBody(
+        uiState = uiState,
+        goToHomeScreen = goToHomeScreen,
+        goToProfileScreen = goToProfileScreen,
+        goToFilmDetails = goToFilmDetails,
+        removeFromWatchList = viewModel::removeFromWatchList,
+        getFilmsById = viewModel::getFilmsById,
+        deleteWatchList = viewModel::deleteWatchList,
+    )
+}
+
+@Composable
+fun WatchListBody(
+    uiState: WatchListUIState,
+    removeFromWatchList: (Int, Int) -> Unit,
+    getFilmsById: (List<Int>) -> Unit,
+    deleteWatchList: (Int) -> Unit,
+    goToHomeScreen: () -> Unit,
+    goToProfileScreen: () -> Unit,
+    goToFilmDetails: (Int, Int) -> Unit
+) {
+    var openDialog by remember { mutableStateOf(false) }
+    val showNumberIndicator by remember { mutableStateOf(true) }
+    var currentList by remember { mutableStateOf<List<WatchListEntity>>(emptyList()) }
+    LaunchedEffect(uiState.watchList) {
+        currentList = uiState.watchList?.firstOrNull() ?: emptyList()
+    }
+
 
     Column(
         modifier = Modifier
@@ -119,8 +160,6 @@ fun WatchListScreen(
             }
         }
 
-        var openDialog by remember { mutableStateOf(false) }
-        val showNumberIndicator by remember { mutableStateOf(true) }
         AnimatedVisibility(visible = showNumberIndicator) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -152,28 +191,32 @@ fun WatchListScreen(
                 .fillMaxSize(),
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
-            items(currentList, key = { it.watchListId }) { film ->
-                SwipeToDismissItem(
-                    modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
-                    onDismiss = {
-                        watchListViewModel.removeFromWatchList(film.watchListId)
-                        currentList = currentList.filter { it.watchListId != film.watchListId }
-                    }) {
-                    SearchResultItem(
-                        title = film.title,
-                        mediaType = film.mediaType,
-                        posterImage = "${Constants.BASE_POSTER_IMAGE_URL}/${film.imagePath}",
-                        genres = emptyList(),
-                        rating = film.rating ?: 0.0,
-                        releaseYear = film.releaseDate,
-                        onClick = {
-                            if (film.mediaType == "movie") {
-                                goToFilmDetails(film.watchListId, 1)
-                            } else {
-                                goToFilmDetails(film.watchListId, 2)
-                            }
+            items(currentList, key = { it.watchListId ?: 0 }) { film ->
+                val filmDetails = uiState.film.find { it.id == film.filmId }
+                filmDetails?.let { details ->
+                    SwipeToDismissItem(
+                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
+                        onDismiss = {
+                            removeFromWatchList(film.filmId, uiState.userId ?: 0)//TODO
+                            currentList = currentList.filter { it.watchListId != film.watchListId }
                         }
-                    )
+                    ) {
+                        SearchResultItem(
+                            title = details.title ?: details.titleSeries ?: "",
+                            mediaType = details.mediaType,
+                            posterImage = "${Constants.BASE_POSTER_IMAGE_URL}/${details.posterPath}",
+                            genres = emptyList(),
+                            rating = details.voteAverage,
+                            releaseYear = details.releaseDate ?: details.releaseDateSeries ?: "TBA",
+                            onClick = {
+                                if (details.mediaType == "movie") {
+                                    goToFilmDetails(details.id, 1)
+                                } else {
+                                    goToFilmDetails(details.id, 2)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -185,7 +228,7 @@ fun WatchListScreen(
                 shape = RoundedCornerShape(8.dp),
                 confirmButton = {
                     TextButton(onClick = {
-                        watchListViewModel.deleteWatchList()
+                        deleteWatchList(uiState.userId ?: 0)
                         currentList = emptyList()
                         openDialog = false
                     }) {

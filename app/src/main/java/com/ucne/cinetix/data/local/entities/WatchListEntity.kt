@@ -6,11 +6,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "WatchList")
 data class WatchListEntity(
     @PrimaryKey
-    val watchListId: Int,
-    val mediaType: String? = "",
-    val imagePath: String? = "",
-    val title: String? = "",
-    val releaseDate: String? = "TBA",
-    val rating: Double? = 0.0,
+    val watchListId: Int? = null,
+    val userId: Int,
+    val filmId: Int,
     val addedOn: String,
 )
