@@ -26,7 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +59,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
+import com.ucne.cinetix.presentation.auth.AuthState
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.presentation.components.ExpandableText
 import com.ucne.cinetix.presentation.components.MovieGenreLabel
@@ -81,6 +84,7 @@ fun FilmDetailsScreen(
     refreshPage: (Int, Int) -> Unit
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val authState = viewModel.authState.observeAsState()
     viewModel.usuarios.collectAsStateWithLifecycle()
     var film by remember { mutableStateOf<FilmEntity?>(null) }
 
@@ -93,6 +97,7 @@ fun FilmDetailsScreen(
 
     FilmDetailsBody(
         uiState = uiState,
+        authState = authState,
         film = film,
         selectedFilm = selectedFilm,
         goToHomeScreen = goToHomeScreen,
@@ -107,6 +112,7 @@ fun FilmDetailsScreen(
 fun FilmDetailsBody(
     uiState: FilmDetailsUIState,
     film: FilmEntity?,
+    authState: State<AuthState?>,
     selectedFilm: Int,
     goToHomeScreen: () -> Unit,
     goToWatchListScreen: () -> Unit,
@@ -273,38 +279,40 @@ fun FilmDetailsBody(
                             .padding(start = 4.dp, bottom = 8.dp)
                             .fillMaxWidth(0.42F),
                     ) {
-                        val context = LocalContext.current
-                        IconButton(onClick = {
-                            onWatchListChanged(film.id, uiState.userId)
-                            if (uiState.addedToWatchList) {
-                                Toast.makeText(
-                                    context, "Removed from watchlist", LENGTH_SHORT
-                                ).show()
+                        if(authState.value is AuthState.Authenticated){
+                            val context = LocalContext.current
+                            IconButton(onClick = {
+                                onWatchListChanged(film.id, uiState.userId)
+                                if (uiState.addedToWatchList) {
+                                    Toast.makeText(
+                                        context, "Removed from watchlist", LENGTH_SHORT
+                                    ).show()
 
-                            } else {
-                                Toast.makeText(
-                                    context, "Added to watchlist", LENGTH_SHORT
-                                ).show()
+                                } else {
+                                    Toast.makeText(
+                                        context, "Added to watchlist", LENGTH_SHORT
+                                    ).show()
+                                }
+                            }) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (!uiState.addedToWatchList) R.drawable.ic_add_to_list
+                                        else R.drawable.ic_added_to_list
+                                    ),
+                                    tint = AppOnPrimaryColor,
+                                    contentDescription = "add to watch list icon",
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
-                        }) {
-                            Icon(
-                                painter = painterResource(
-                                    id = if (!uiState.addedToWatchList) R.drawable.ic_add_to_list
-                                    else R.drawable.ic_added_to_list
-                                ),
-                                tint = AppOnPrimaryColor,
-                                contentDescription = "add to watch list icon",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = goToWatchListScreen
-                        ) {
-                            Icon(
-                            imageVector = Icons.Rounded.Shop,
-                                tint = AppOnPrimaryColor,
-                                contentDescription = "watchlist icon"
-                            )
+                            IconButton(
+                                onClick = goToWatchListScreen
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Shop,
+                                    tint = AppOnPrimaryColor,
+                                    contentDescription = "watchlist icon"
+                                )
+                            }
                         }
                     }
                 }

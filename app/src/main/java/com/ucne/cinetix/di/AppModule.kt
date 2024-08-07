@@ -6,8 +6,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.ucne.cinetix.data.local.database.CineTixDb
+import com.ucne.cinetix.data.remote.CineTixApi
 import com.ucne.cinetix.data.remote.TheMovieDbApi
 import com.ucne.cinetix.util.Constants.BASE_URL
+import com.ucne.cinetix.util.Constants.OWN_API_BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,6 +38,16 @@ object AppModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TheMovieDbApi::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun providesCineTixApi(moshi: Moshi): CineTixApi {
+        return Retrofit.Builder()
+            .baseUrl(OWN_API_BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(CineTixApi::class.java)
     }
 
     //Room local

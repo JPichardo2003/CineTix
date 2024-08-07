@@ -28,9 +28,6 @@ interface CineTixDao {
     suspend fun insertFilms(films: List<FilmEntity>)
 
     @Upsert()
-    suspend fun insertGenre(genre: GenreEntity)
-
-    @Upsert()
     suspend fun insertGenres(genres: List<GenreEntity>)
 
     // PagingSource methods

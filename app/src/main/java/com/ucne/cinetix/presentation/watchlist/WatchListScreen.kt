@@ -63,22 +63,10 @@ fun WatchListScreen(
     goToFilmDetails: (Int, Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val watchList by viewModel.watchList.collectAsStateWithLifecycle()
+    viewModel.watchList.collectAsStateWithLifecycle()
     viewModel.usuarios.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.getUserIdByEmail()
-    }
-
-    // Obtener la lista de observación solo si userId está disponible
-    LaunchedEffect(uiState.userId) {
-        uiState.userId?.let { userId ->
-            viewModel.getFilmsByUser(userId)
-        }
-    }
-
-    LaunchedEffect(watchList) {
-        val filmIds = watchList.map { it.filmId }
-        viewModel.getFilmsById(filmIds)
     }
 
     WatchListBody(
@@ -87,7 +75,6 @@ fun WatchListScreen(
         goToProfileScreen = goToProfileScreen,
         goToFilmDetails = goToFilmDetails,
         removeFromWatchList = viewModel::removeFromWatchList,
-        getFilmsById = viewModel::getFilmsById,
         deleteWatchList = viewModel::deleteWatchList,
     )
 }
@@ -96,7 +83,6 @@ fun WatchListScreen(
 fun WatchListBody(
     uiState: WatchListUIState,
     removeFromWatchList: (Int, Int) -> Unit,
-    getFilmsById: (List<Int>) -> Unit,
     deleteWatchList: (Int) -> Unit,
     goToHomeScreen: () -> Unit,
     goToProfileScreen: () -> Unit,

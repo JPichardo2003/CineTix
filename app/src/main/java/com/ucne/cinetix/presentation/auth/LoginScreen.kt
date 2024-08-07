@@ -69,7 +69,7 @@ fun LoginScreen(
             Toast.makeText(context, "Loading", Toast.LENGTH_SHORT).show()
         }
         when(authState.value) {
-            is AuthState.Authenticated -> goToHomeScreen()
+            is AuthState.Authenticated -> {goToHomeScreen()}
             is AuthState.Error -> Toast.makeText(context,
                 (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()
             else -> Unit
