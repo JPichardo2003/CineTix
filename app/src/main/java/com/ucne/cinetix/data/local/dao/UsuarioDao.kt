@@ -24,4 +24,7 @@ interface UsuarioDao {
 
     @Query("SELECT * FROM Usuarios WHERE email LIKE :email LIMIT 1")
     suspend fun getUserByEmail(email: String): UsuarioEntity?
+
+    @Query("SELECT COUNT(*) FROM Usuarios WHERE userName = :userName")
+    suspend fun exists(userName: String): Boolean
 }

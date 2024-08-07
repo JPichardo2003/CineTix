@@ -34,7 +34,6 @@ interface CineTixApi {
     suspend fun updateWatchList(@Path("id") id: Int, @Body watchListDto: WatchListDto?): WatchListDto
     @DELETE("api/WatchList/{id}")
     suspend fun deleteWatchList(@Path("id") id: Int): Response<Unit>
-
     @DELETE("api/WatchList/user/{userId}")
     suspend fun deleteWatchListByUserId(@Path("userId") userId: Int): Response<Unit>
     @DELETE("api/WatchList/{filmId}/{userId}")

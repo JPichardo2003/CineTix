@@ -231,61 +231,6 @@ fun LoginBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Or",
-            textAlign = TextAlign.Center,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Continue With",
-            textAlign = TextAlign.Center,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            OutlinedButton(
-                onClick = {  /*TODO: Google login*/ },
-                modifier = Modifier
-                    .height(57.dp)
-                    .weight(1f)
-                    .padding(end = 8.dp),
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.google),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Google", color = Color.White)
-            }
-
-            OutlinedButton(
-                onClick = {  /*TODO: Facebook login*/  },
-                modifier = Modifier
-                    .height(57.dp)
-                    .weight(1f)
-                    .padding(start = 8.dp),
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.facebook),
-                    contentDescription = null,
-                    modifier = Modifier.size(39.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Facebook", color = Color.White)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
@@ -305,4 +250,3 @@ fun LoginBody(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
