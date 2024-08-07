@@ -91,25 +91,31 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun getUsuariosFromApi(){
+    private fun getUserNameByEmail() {
         viewModelScope.launch {
-            userRepository.getUsersFromApi()
+            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
+            _uiState.update {
+                it.copy(
+                    userName = usuario?.userName ?: ""
+                )
+            }
         }
     }
 
-    fun getUsuarioById(userId: Int){
+    private fun getPasswordByEmail() {
         viewModelScope.launch {
-            val usuario = userRepository.getUserById(userId)
-            usuario?.let {
-                _uiState.update {
-                    it.copy(
-                        userId = it.userId,
-                        userName = it.userName,
-                        email = it.email,
-                        password = it.password
-                    )
-                }
+            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
+            _uiState.update {
+                it.copy(
+                    password = usuario?.password ?: ""
+                )
             }
+        }
+    }
+
+    private fun getUsuariosFromApi(){
+        viewModelScope.launch {
+            userRepository.getUsersFromApi()
         }
     }
 
@@ -121,18 +127,6 @@ class AuthViewModel @Inject constructor(
             }catch(e: Exception){
                 Log.e("Error", "Error adding user to api")
             }
-        }
-    }
-
-    fun deleteUser(){
-        viewModelScope.launch {
-            userRepository.deleteUser(_uiState.value.toEntity())
-        }
-    }
-
-    fun newUser(){
-        viewModelScope.launch {
-            _uiState.value = UsuarioUIState()
         }
     }
 
@@ -161,28 +155,6 @@ class AuthViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     password = password
-                )
-            }
-        }
-    }
-
-    private fun getUserNameByEmail() {
-        viewModelScope.launch {
-            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
-            _uiState.update {
-                it.copy(
-                    userName = usuario?.userName ?: ""
-                )
-            }
-        }
-    }
-
-    private fun getPasswordByEmail() {
-        viewModelScope.launch {
-            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
-            _uiState.update {
-                it.copy(
-                    password = usuario?.password ?: ""
                 )
             }
         }

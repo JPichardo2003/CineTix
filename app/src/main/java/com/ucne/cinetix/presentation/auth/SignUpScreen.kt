@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -190,6 +191,9 @@ fun SignUpBody(
                 unfocusedIndicatorColor = Color.White,
                 cursorColor = Color.White
             ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -234,8 +238,10 @@ fun SignUpBody(
                 unfocusedIndicatorColor = Color.White,
                 cursorColor = Color.White
             ),
+            singleLine = true,
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done),
             modifier = Modifier.fillMaxWidth()
         )
 
