@@ -32,4 +32,7 @@ interface WatchListDao {
     @Query("SELECT * FROM Films WHERE id IN (:filmId)")
     fun getFilmsById(filmId: List<Int>): Flow<List<FilmEntity>>?
 
+    @Query("SELECT COUNT(*) FROM watchlist WHERE userId = :userId AND filmId = :filmId")
+    suspend fun existsByFilmIdAndUserId(userId: Int, filmId: Int): Boolean
+
 }
