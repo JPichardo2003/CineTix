@@ -1,5 +1,6 @@
 package com.ucne.cinetix.presentation.watchlist
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -63,9 +65,9 @@ class WatchListViewModel @Inject constructor(
                     )
                 }
             }
+            getWatchListFromApi()
         }
     }
-
 
     fun getUserIdByEmail() {
         viewModelScope.launch {
@@ -75,42 +77,54 @@ class WatchListViewModel @Inject constructor(
                     userId = usuario?.userId
                 )
             }
+            usuario?.userId?.let { userId ->
+                getFilmsByUser(userId)
+            }
         }
     }
 
-    fun getFilmsByUser(userId: Int) {
+    private fun getFilmsByUser(userId: Int) {
         viewModelScope.launch {
             val filmsByUser = watchListRepository.getFilmsByUser(userId)
             _uiState.update { it.copy(watchList = filmsByUser) }
-        }
-    }
-
-
-    private fun exists(mediaId: Int, userId: Int) {
-        viewModelScope.launch {
-            val exists = watchListRepository.exists(mediaId, userId)
-            _uiState.update { it.copy(addedToWatchList = exists) }
+            val filmIds = filmsByUser?.firstOrNull()?.map { it.filmId } ?: emptyList()
+            getFilmsById(filmIds)
         }
     }
 
     fun removeFromWatchList(filmId: Int, userId: Int) {
         viewModelScope.launch {
             watchListRepository.removeFromWatchList(filmId, userId)
+            try{
+                watchListRepository.removeFromWatchListToApi(filmId, userId)
+            }catch(e: Exception){
+                Log.e("Error", "Error removing watchlist ${e.message}")
+            }
         }
     }
-
 
     fun deleteWatchList(userId: Int) {
         viewModelScope.launch {
             watchListRepository.deleteWatchList(userId)
+            try{
+                watchListRepository.deleteWatchListByUserIdToApi(userId)
+            }catch(e: Exception){
+                Log.e("Error", "Error deleting watchlist ${e.message}")
+            }
         }
     }
 
-    fun getFilmsById(filmId: List<Int>) {
+    private fun getFilmsById(filmId: List<Int>) {
         viewModelScope.launch {
             watchListRepository.getFilmsById(filmId)?.collect { films ->
                 _uiState.update { it.copy(film = films) }
             }
+        }
+    }
+
+    private fun getWatchListFromApi(){
+        viewModelScope.launch {
+            watchListRepository.getWatchListFromApi()
         }
     }
 }

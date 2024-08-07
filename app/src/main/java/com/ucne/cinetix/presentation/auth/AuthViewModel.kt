@@ -1,10 +1,12 @@
 package com.ucne.cinetix.presentation.auth
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucne.cinetix.data.local.entities.UsuarioEntity
+import com.ucne.cinetix.data.remote.dto.UsuarioDto
 import com.ucne.cinetix.data.repository.AuthRepository
 import com.ucne.cinetix.data.repository.UsuarioRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +30,13 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableLiveData<AuthState>()
     val authState: LiveData<AuthState> = _authState
 
+    val usuarios = userRepository.getUsers()
+        .stateIn(
+            scope =viewModelScope,
+            started =  SharingStarted.WhileSubscribed(),
+            initialValue = emptyList()
+        )
+
     init {
         checkAuthStatus()
     }
@@ -37,13 +46,16 @@ class AuthViewModel @Inject constructor(
             authRepository.checkAuthStatus().collect{
                 _authState.value = it
             }
-        }
-        if(_authState.value is AuthState.Authenticated){
-            _uiState.update {
-                it.copy(
-                    email = (_authState.value as AuthState.Authenticated).email,
-                )
+            if(_authState.value is AuthState.Authenticated){
+                _uiState.update {
+                    it.copy(
+                        email = (_authState.value as AuthState.Authenticated).email,
+                    )
+                }
             }
+            getUsuariosFromApi()
+            getUserNameByEmail()
+            getPasswordByEmail()
         }
     }
 
@@ -74,12 +86,11 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    val usuarios = userRepository.getUsers()
-        .stateIn(
-            scope =viewModelScope,
-            started =  SharingStarted.WhileSubscribed(),
-            initialValue = emptyList()
-        )
+    private fun getUsuariosFromApi(){
+        viewModelScope.launch {
+            userRepository.getUsersFromApi()
+        }
+    }
 
     fun getUsuarioById(userId: Int){
         viewModelScope.launch {
@@ -97,9 +108,14 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun saveUser(){
+    private fun saveUser(){
         viewModelScope.launch {
             userRepository.saveUser(_uiState.value.toEntity())
+            try{
+                userRepository.addUserToApi(_uiState.value.toDto())
+            }catch(e: Exception){
+                Log.e("Error", "Error adding user to api")
+            }
         }
     }
 
@@ -145,14 +161,26 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun getUserNameByMail(email: String): String {
-        val usuario = usuarios.value.find { it.email == email }
-        return usuario?.userName ?: ""
+    private fun getUserNameByEmail() {
+        viewModelScope.launch {
+            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
+            _uiState.update {
+                it.copy(
+                    userName = usuario?.userName ?: ""
+                )
+            }
+        }
     }
 
-    fun getUserIdByEmail(email: String): Int {
-        val usuario = usuarios.value.find { it.email == email }
-        return usuario?.userId ?: 0
+    private fun getPasswordByEmail() {
+        viewModelScope.launch {
+            val usuario = userRepository.getUserByEmail(uiState.value.email ?: "")
+            _uiState.update {
+                it.copy(
+                    password = usuario?.password ?: ""
+                )
+            }
+        }
     }
 }
 
@@ -171,6 +199,13 @@ data class UsuarioUIState(
 )
 
 fun UsuarioUIState.toEntity() = UsuarioEntity(
+    userId = userId,
+    userName = userName,
+    email = email,
+    password = password
+)
+
+fun UsuarioUIState.toDto() = UsuarioDto(
     userId = userId,
     userName = userName,
     email = email,

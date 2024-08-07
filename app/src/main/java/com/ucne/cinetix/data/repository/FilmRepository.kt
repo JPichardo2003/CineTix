@@ -75,6 +75,98 @@ class FilmRepository @Inject constructor(
         }
     }
 
+    suspend fun getAllMoviesFromApi(filmType: FilmType) {
+        try {
+            val trendingMovies = theMovieDbApi.getTrendingMovies(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+            val popularMovies = theMovieDbApi.getPopularMovies(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+            val topRatedMovies = theMovieDbApi.getTopRatedMovies(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+            val nowPlayingMovies = theMovieDbApi.getNowPlayingMovies(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+            val upcomingMovies = theMovieDbApi.getUpcomingMovies(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            val backInTheDaysMovies = theMovieDbApi.getBackInTheDaysMovies(
+                1,
+                "1940-01-01",
+                "1981-01-01",
+                Constants.API_KEY,
+                Constants.LANGUAGE
+            )
+
+            val allMovies = trendingMovies.results +
+                    popularMovies.results +
+                    topRatedMovies.results +
+                    nowPlayingMovies.results +
+                    upcomingMovies.results +
+                    backInTheDaysMovies.results
+
+            insertFilmsInDatabase(allMovies, filmType)
+        } catch (e: Exception) {
+            Log.e("Error", "Error fetching movies: ${e.message}")
+        }
+    }
+
+    suspend fun getAllSeriesFromApi(filmType: FilmType) {
+        try {
+            val trendingSeries = theMovieDbApi.getTrendingTvSeries(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            val popularSeries = theMovieDbApi.getPopularTvShows(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            val topRatedSeries = theMovieDbApi.getTopRatedTvShows(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            val nowPlayingSeries = theMovieDbApi.getOnTheAirTvShows(
+                1,
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+            val backInTheDaysSeries = theMovieDbApi.getBackInTheDaysTvShows(
+                1,
+                "1940-01-01",
+                "1981-01-01",
+                Constants.API_KEY,
+                Constants.LANGUAGE_COUNTRY_CODE
+            )
+
+            val allSeries = trendingSeries.results +
+                    popularSeries.results +
+                    topRatedSeries.results +
+                    nowPlayingSeries.results +
+                    backInTheDaysSeries.results
+
+            insertFilmsInDatabase(allSeries, filmType)
+        } catch (e: Exception) {
+            Log.e("Error", "Error fetching series: ${e.message}")
+        }
+    }
+
+
+
     suspend fun getSimilarMovieFromApi(filmId: Int, filmType: FilmType){
         try{
             val movies = theMovieDbApi.getSimilarMovies(
@@ -100,152 +192,6 @@ class FilmRepository @Inject constructor(
             insertFilmsInDatabase(series.results, filmType)
         }catch (e: Exception){
             Log.e("Error", "Error fetching similar series")
-        }
-    }
-
-    suspend fun getTrendingMovieFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getTrendingMovies(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE
-            )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching trending movies")
-        }
-    }
-    suspend fun getTrendingTvShowFromApi(filmType: FilmType){
-        try{
-            val series = theMovieDbApi.getTrendingTvSeries(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-            )
-            insertFilmsInDatabase(series.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching trending series")
-        }
-    }
-
-    suspend fun getPopularMovieFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getPopularMovies(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE
-            )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching popular movies")
-        }
-    }
-
-    suspend fun getPopularSeriesFromApi(filmType: FilmType){
-        try{
-            val series = theMovieDbApi.getPopularTvShows(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-                )
-            insertFilmsInDatabase(series.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching popular series")
-        }
-    }
-
-    suspend fun getTopRatedMovieFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getTopRatedMovies(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE
-            )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching top rated films")
-        }
-    }
-
-    suspend fun getTopRatedSeriesFromApi(filmType: FilmType){
-        try{
-            val series = theMovieDbApi.getTopRatedTvShows(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-                )
-            insertFilmsInDatabase(series.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching top rated series")
-        }
-    }
-
-    suspend fun getNowPlayingMovieFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getNowPlayingMovies(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE
-            )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching now playing films")
-        }
-    }
-
-    suspend fun getNowPlayingSeriesFromApi(filmType: FilmType){
-        try{
-            val series = theMovieDbApi.getOnTheAirTvShows(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-                )
-            insertFilmsInDatabase(series.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching now playing series")
-        }
-    }
-
-    suspend fun getUpcomingMoviesFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getUpcomingMovies(
-                1,
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-                )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching upcoming movies")
-        }
-    }
-
-    suspend fun getBackInTheDaysMovieFromApi(filmType: FilmType){
-        try{
-            val movies = theMovieDbApi.getBackInTheDaysMovies(
-                1,
-                "1940-01-01",
-                "1981-01-01",
-                Constants.API_KEY,
-                Constants.LANGUAGE
-            )
-            insertFilmsInDatabase(movies.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching back in the days films")
-        }
-    }
-
-    suspend fun getBackInTheDaysSeriesFromApi(filmType: FilmType){
-        try{
-            val series = theMovieDbApi.getBackInTheDaysTvShows(
-                1,
-                "1940-01-01",
-                "1981-01-01",
-                Constants.API_KEY,
-                Constants.LANGUAGE_COUNTRY_CODE
-                )
-            insertFilmsInDatabase(series.results, filmType)
-        }catch (e: Exception){
-            Log.e("Error", "Error fetching back in the days series")
         }
     }
 
@@ -275,5 +221,3 @@ class FilmRepository @Inject constructor(
         ).flow
     }
 }
-
-/*TODO: Que todo lo que se muestre sea por DBROOM (DONE)*/

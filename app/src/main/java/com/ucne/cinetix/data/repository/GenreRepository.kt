@@ -21,19 +21,18 @@ class GenreRepository @Inject constructor(
         val movieGenresResponse = try {
             theMovieDbApi.getMovieGenres()
         } catch (e: Exception) {
+            Log.e("Error", "Error fetching movie genres: ${e.message}")
             return Resource.Error("Error fetching movie genres: ${e.message}")
         }
         val tvGenresResponse = try {
             theMovieDbApi.getTvShowGenres()
         } catch (e: Exception) {
+            Log.e("Error", "Error fetching TV show genres: ${e.message}")
             return Resource.Error("Error fetching TV show genres: ${e.message}")
         }
-        // Combine the genres
         val allGenres = movieGenresResponse.genres + tvGenresResponse.genres
-
         val genreEntities = allGenres.map { it.toEntity() }
         cineTixDao.insertGenres(genreEntities)
-
         val combinedResponse = GenreResponse(genres = allGenres)
         return Resource.Success(combinedResponse)
     }

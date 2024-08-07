@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.Logout
 import androidx.compose.material.icons.rounded.Shop
 import androidx.compose.material3.Button
@@ -25,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +37,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,8 +86,7 @@ fun ProfileScreen(
         uiState = uiState,
         signOut = viewModel::signOut,
         goToHomeScreen = goToHomeScreen,
-        goToWatchListScreen = goToWatchListScreen,
-        getUserNameByMail = viewModel::getUserNameByMail
+        goToWatchListScreen = goToWatchListScreen
     )
 }
 
@@ -89,7 +94,6 @@ fun ProfileScreen(
 fun ProfileBody(
     uiState: UsuarioUIState,
     signOut: () -> Unit,
-    getUserNameByMail: (String) -> String,
     goToHomeScreen: () -> Unit,
     goToWatchListScreen: () -> Unit
 ) {
@@ -211,7 +215,7 @@ fun ProfileBody(
 
             // Foto de perfil
             CoilImage(
-                imageModel = R.drawable.profile_photo,
+                imageModel = R.drawable.muzanprofilepic,
                 previewPlaceholder = R.drawable.profile_photo,
                 contentScale = ContentScale.Crop,
                 circularReveal = CircularReveal(duration = 1000),
@@ -235,7 +239,7 @@ fun ProfileBody(
 
             // Nombre de usuario
             Text(
-                text = getUserNameByMail(uiState.email ?: ""),
+                text = uiState.userName,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 color = AppOnPrimaryColor,
@@ -291,6 +295,7 @@ fun ProfileBody(
             }
 
             // Configuraciones de perfil
+            var passwordVisible by remember { mutableStateOf(false) }
             Box(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
@@ -312,31 +317,30 @@ fun ProfileBody(
                     Text(
                         text = "Information",
                         fontSize = 18.sp,
-                        color = AppOnPrimaryColor,
+                        color = Color.White,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Divider()
+                    Divider(color = Color.White)
 
-                    ProfileTextField(
+                    ProfileInfoRow(
                         label = "Email",
-                        value = uiState.email ?: "no email",
-                        onValueChange = {}
+                        value = uiState.email ?: "no email"
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProfileTextField(
+                    ProfileInfoRow(
                         label = "Password",
-                        value = "*******",
-                        onValueChange = {}
+                        value = if (passwordVisible) uiState.password ?: "no password" else "*******",
+                        isPassword = true,
+                        onEyeClick = { passwordVisible = !passwordVisible }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    ProfileTextField(
+                    ProfileInfoRow(
                         label = "Username",
-                        value = getUserNameByMail(uiState.email ?: ""),
-                        onValueChange = {}
+                        value = uiState.userName
                     )
                 }
             }
@@ -346,10 +350,11 @@ fun ProfileBody(
 }
 
 @Composable
-fun ProfileTextField(
+fun ProfileInfoRow(
     label: String,
     value: String,
-    onValueChange: (String) -> Unit
+    isPassword: Boolean = false,
+    onEyeClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -366,18 +371,25 @@ fun ProfileTextField(
             modifier = Modifier.weight(1f),
         )
 
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.weight(2f),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.White,
-                unfocusedIndicatorColor = Color.White
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(2f)
+        ) {
+            Text(
+                text = value,
+                fontSize = 16.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Normal,
             )
-        )
+            if (isPassword && onEyeClick != null) {
+                IconButton(onClick = onEyeClick) {
+                    Icon(
+                        imageVector = if (value == "*******") Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (value == "*******") "Show password" else "Hide password",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
     }
 }

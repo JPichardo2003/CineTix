@@ -1,5 +1,6 @@
 package com.ucne.cinetix.presentation.moviedetails
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import androidx.paging.cachedIn
 import com.ucne.cinetix.data.local.entities.FilmEntity
 import com.ucne.cinetix.data.local.entities.GenreEntity
 import com.ucne.cinetix.data.local.entities.WatchListEntity
+import com.ucne.cinetix.data.remote.dto.WatchListDto
 import com.ucne.cinetix.data.repository.AuthRepository
 import com.ucne.cinetix.data.repository.FilmRepository
 import com.ucne.cinetix.data.repository.GenreRepository
@@ -134,7 +136,7 @@ class FilmDetailsViewModel @Inject constructor(
     }
 
     // Watchlist
-    fun addToWatchList(filmId: Int, userId: Int) {
+    private fun addToWatchList(filmId: Int, userId: Int) {
         val date = SimpleDateFormat.getDateTimeInstance().format(Date())
         viewModelScope.launch {
             watchListRepository.addToWatchList(
@@ -144,6 +146,18 @@ class FilmDetailsViewModel @Inject constructor(
                     addedOn = date
                 )
             )
+            try{
+                watchListRepository.addWatchListToApi(
+                    WatchListDto(
+                        userId = userId,
+                        filmId = filmId,
+                        addedOn = date
+                    )
+                )
+            }catch(e: Exception){
+                Log.e("Error", "Error adding watchlist to API")
+            }
+
         }
     }
 
@@ -176,6 +190,11 @@ class FilmDetailsViewModel @Inject constructor(
     private fun removeFromWatchList(filmId: Int, userId: Int) {
         viewModelScope.launch {
             watchListRepository.removeFromWatchList(filmId, userId)
+            try{
+                watchListRepository.removeFromWatchListToApi(filmId, userId)
+            }catch(e: Exception){
+                Log.e("Error", "Error deleting watchlist from API")
+            }
         }
     }
 

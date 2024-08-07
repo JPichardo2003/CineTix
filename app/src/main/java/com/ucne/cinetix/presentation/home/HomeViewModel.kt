@@ -64,18 +64,9 @@ class HomeViewModel @Inject constructor(
     private fun getDataFromAPi(filmType: FilmType = uiState.value.selectedFilmType){
         viewModelScope.launch {
             if(filmType == FilmType.MOVIE){
-                filmRepository.getTrendingMovieFromApi(filmType)
-                filmRepository.getPopularMovieFromApi(filmType)
-                filmRepository.getTopRatedMovieFromApi(filmType)
-                filmRepository.getNowPlayingMovieFromApi(filmType)
-                filmRepository.getBackInTheDaysMovieFromApi(filmType)
-                filmRepository.getUpcomingMoviesFromApi(filmType)
+                filmRepository.getAllMoviesFromApi(filmType)
             }else{
-                filmRepository.getTrendingTvShowFromApi(filmType)
-                filmRepository.getPopularSeriesFromApi(filmType)
-                filmRepository.getTopRatedSeriesFromApi(filmType)
-                filmRepository.getNowPlayingSeriesFromApi(filmType)
-                filmRepository.getBackInTheDaysSeriesFromApi(filmType)
+                filmRepository.getAllSeriesFromApi(filmType)
             }
 
         }

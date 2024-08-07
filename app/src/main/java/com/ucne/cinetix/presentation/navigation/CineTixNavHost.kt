@@ -19,7 +19,7 @@ fun CineTixNavHost(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.WatchList,
+        startDestination = Screen.Login,
     ) {
         composable<Screen.Home> {
             HomeScreen(
