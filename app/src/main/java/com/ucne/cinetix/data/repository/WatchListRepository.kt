@@ -24,8 +24,14 @@ class WatchListRepository @Inject constructor(
     suspend fun getWatchListFromApi(){
         try{
             val watchList = cineTixApi.getAllWatchList()
-            watchList.forEach{
-                addToWatchList(it.toEntity())
+            watchList.forEach{ washListItem ->
+                val exist = watchListDao.existsByFilmIdAndUserId(
+                    washListItem.userId,
+                    washListItem.filmId
+                )
+                if(!exist){
+                    addToWatchList(washListItem.toEntity())
+                }
             }
         }catch(e: Exception){
             Log.e("Error", "Error fetching watchlist")
