@@ -17,12 +17,16 @@ class UsuarioRepository @Inject constructor(
     suspend fun getUserById(userId: Int) = usuarioDao.find(userId)
     suspend fun getUserByEmail(email: String) = usuarioDao.getUserByEmail(email)
     fun getUsers() = usuarioDao.getALl()
+    suspend fun existUserName(userName: String) = usuarioDao.exists(userName)
 
     suspend fun getUsersFromApi(){
         try{
             val users = cineTixApi.getUsuarios()
-            users.forEach{
-                saveUser(it.toEntity())
+            users.forEach{ usuario ->
+                val exist = usuarioDao.exists(usuario.userName ?: "")
+                if(!exist){
+                    saveUser(usuario.toEntity())
+                }
             }
         }catch(e: Exception){
             Log.e("Error", "Error fetching users")

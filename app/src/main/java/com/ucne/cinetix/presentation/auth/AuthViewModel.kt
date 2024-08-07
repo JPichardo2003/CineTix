@@ -69,11 +69,16 @@ class AuthViewModel @Inject constructor(
 
     fun signUp(email : String, password : String){
         viewModelScope.launch {
-            authRepository.signUp(email,password).collect{
-                _authState.value = it
-            }
-            if(_authState.value is AuthState.Authenticated){
-                saveUser()
+            val usernameExists = userRepository.existUserName(_uiState.value.userName)
+            if (usernameExists) {
+                _authState.value = AuthState.Error("El nombre de usuario ya existe.")
+            } else {
+                authRepository.signUp(email,password).collect{
+                    _authState.value = it
+                }
+                if(_authState.value is AuthState.Authenticated){
+                    saveUser()
+                }
             }
         }
     }
