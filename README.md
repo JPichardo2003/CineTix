@@ -19,7 +19,9 @@ Construida con prácticas modernas de desarrollo de Android, CineTix utiliza Kot
 - **Búsqueda**: Encuentra películas fácilmente con una función de búsqueda completa.
 - **Detalles**: Dale click a la pelicula o Serie que desees para conocer de que trata, su rating y fecha de lanzamiento.
 - **Interfaz de Usuario Atractiva**: Diseño moderno utilizando Jetpack Compose.
-
+- **Clean Architecture**: Arquitectura Limpia.
+- **MVVM**: Model-View-ViewModel
+  
 ## Capturas de Pantalla
 
 ![image](https://github.com/user-attachments/assets/6d8e0cb8-260f-4256-ab57-1fa2d4fcbee5)
