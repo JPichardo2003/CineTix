@@ -30,6 +30,10 @@ Construida con prácticas modernas de desarrollo de Android, CineTix utiliza Kot
 ![image](https://github.com/user-attachments/assets/20cbbf36-c7b3-4ecf-8db5-a62016e11be0)
 ![image](https://github.com/user-attachments/assets/46e199a5-a285-4ec0-b03c-74b5f05a0681)
 ![image](https://github.com/user-attachments/assets/28d4efa7-e6fd-4e19-8aef-08ac54fdcafa)
+![image](https://github.com/user-attachments/assets/30c3cf07-d367-4aa7-93e8-5d8e635e808e)
+![image](https://github.com/user-attachments/assets/679da812-ddbc-49f3-8036-8e4fca17fcf4)
+
+
 
 
 ## Instalación
