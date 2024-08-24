@@ -1,5 +1,6 @@
 package com.ucne.cinetix.presentation.watchlist
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -59,7 +60,6 @@ import kotlinx.coroutines.flow.firstOrNull
 fun WatchListScreen(
     viewModel: WatchListViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit,
-    goToProfileScreen: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,7 +72,6 @@ fun WatchListScreen(
     WatchListBody(
         uiState = uiState,
         goToHomeScreen = goToHomeScreen,
-        goToProfileScreen = goToProfileScreen,
         goToFilmDetails = goToFilmDetails,
         removeFromWatchList = viewModel::removeFromWatchList,
         deleteWatchList = viewModel::deleteWatchList,
@@ -85,7 +84,6 @@ fun WatchListBody(
     removeFromWatchList: (Int, Int) -> Unit,
     deleteWatchList: (Int) -> Unit,
     goToHomeScreen: () -> Unit,
-    goToProfileScreen: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
@@ -111,9 +109,11 @@ fun WatchListBody(
                 .fillMaxWidth()
         ) {
             val focusManager = LocalFocusManager.current
+            val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner
+                .current?.onBackPressedDispatcher
             BackButton {
                 focusManager.clearFocus()
-                goToProfileScreen()
+                onBackPressedDispatcher?.onBackPressed()
             }
 
             Text(
@@ -183,7 +183,7 @@ fun WatchListBody(
                     SwipeToDismissItem(
                         modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                         onDismiss = {
-                            removeFromWatchList(film.filmId, uiState.userId ?: 0)//TODO
+                            removeFromWatchList(film.filmId, uiState.userId ?: 0)
                             currentList = currentList.filter { it.watchListId != film.watchListId }
                         }
                     ) {
