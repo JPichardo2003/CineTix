@@ -58,7 +58,6 @@ import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import com.ucne.cinetix.R
 import com.ucne.cinetix.data.local.entities.FilmEntity
-import com.ucne.cinetix.data.local.entities.WatchListEntity
 import com.ucne.cinetix.presentation.auth.AuthState
 import com.ucne.cinetix.presentation.components.BackButton
 import com.ucne.cinetix.presentation.components.ExpandableText
@@ -71,15 +70,13 @@ import com.ucne.cinetix.ui.theme.rememberGradientColors
 import com.ucne.cinetix.util.Constants.BASE_BACKDROP_IMAGE_URL
 import com.ucne.cinetix.util.Constants.BASE_POSTER_IMAGE_URL
 import com.ucne.cinetix.util.FilmType
-import java.text.SimpleDateFormat
-import java.util.Date
 
 @Composable
 fun FilmDetailsScreen(
     viewModel: FilmDetailsViewModel = hiltViewModel(),
     filmId: Int,
     selectedFilm: Int,
-    goToHomeScreen: () -> Unit,
+    goBack: () -> Unit,
     goToWatchListScreen: () -> Unit,
     refreshPage: (Int, Int) -> Unit
 ){
@@ -100,7 +97,7 @@ fun FilmDetailsScreen(
         authState = authState,
         film = film,
         selectedFilm = selectedFilm,
-        goToHomeScreen = goToHomeScreen,
+        goBack = goBack,
         goToWatchListScreen = goToWatchListScreen,
         refreshPage = refreshPage,
         onWatchListChanged = viewModel::onWatchListChanged,
@@ -114,7 +111,7 @@ fun FilmDetailsBody(
     film: FilmEntity?,
     authState: State<AuthState?>,
     selectedFilm: Int,
-    goToHomeScreen: () -> Unit,
+    goBack: () -> Unit,
     goToWatchListScreen: () -> Unit,
     refreshPage: (Int, Int) -> Unit,
     onWatchListChanged: (Int?, Int?) -> Unit,
@@ -185,7 +182,7 @@ fun FilmDetailsBody(
                             top.linkTo(parent.top, margin = 16.dp)
                             start.linkTo(parent.start, margin = 10.dp)
                         }
-                ) { goToHomeScreen() }
+                ) { goBack() }
 
                 Box(
                     modifier = Modifier

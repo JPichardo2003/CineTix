@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.firstOrNull
 fun WatchListScreen(
     viewModel: WatchListViewModel = hiltViewModel(),
     goToHomeScreen: () -> Unit,
+    goBack: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,6 +73,7 @@ fun WatchListScreen(
     WatchListBody(
         uiState = uiState,
         goToHomeScreen = goToHomeScreen,
+        goBack = goBack,
         goToFilmDetails = goToFilmDetails,
         removeFromWatchList = viewModel::removeFromWatchList,
         deleteWatchList = viewModel::deleteWatchList,
@@ -84,6 +86,7 @@ fun WatchListBody(
     removeFromWatchList: (Int, Int) -> Unit,
     deleteWatchList: (Int) -> Unit,
     goToHomeScreen: () -> Unit,
+    goBack: () -> Unit,
     goToFilmDetails: (Int, Int) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
@@ -92,7 +95,6 @@ fun WatchListBody(
     LaunchedEffect(uiState.watchList) {
         currentList = uiState.watchList?.firstOrNull() ?: emptyList()
     }
-
 
     Column(
         modifier = Modifier
@@ -109,11 +111,9 @@ fun WatchListBody(
                 .fillMaxWidth()
         ) {
             val focusManager = LocalFocusManager.current
-            val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner
-                .current?.onBackPressedDispatcher
             BackButton {
                 focusManager.clearFocus()
-                onBackPressedDispatcher?.onBackPressed()
+                goBack()
             }
 
             Text(

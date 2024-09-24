@@ -62,7 +62,7 @@ fun CineTixNavHost(
             FilmDetailsScreen(
                 filmId = args.filmId,
                 selectedFilm = args.selectedFilmType,
-                goToHomeScreen = { navHostController.navigate(Screen.Home) },
+                goBack = { navHostController.popBackStack() },
                 goToWatchListScreen = { navHostController.navigate(Screen.WatchList) },
                 refreshPage = { id, filmType ->
                     navHostController.navigate(Screen.MovieDetails(id, filmType))
@@ -73,6 +73,9 @@ fun CineTixNavHost(
             WatchListScreen(
                 goToHomeScreen = {
                     navHostController.navigate(Screen.Home)
+                },
+                goBack = {
+                    navHostController.popBackStack()
                 },
                 goToFilmDetails = { id, filmType ->
                     navHostController.navigate(Screen.MovieDetails(id, filmType))
